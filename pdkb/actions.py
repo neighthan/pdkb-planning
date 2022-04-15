@@ -223,10 +223,11 @@ class CombinedDurativeAction:
             neg_end_effects = sorted(self.end_act.effs[0][1], key=lambda e: e.id())
             start_effects = [(e, False) for e in pos_start_effects] + [(e, True) for e in neg_start_effects]
             end_effects = [(e, False) for e in pos_end_effects] + [(e, True) for e in neg_end_effects]
+            # the right parens are missing here on purpose! those are added in effect.pddl
             lines.extend([
                 "\n    :effect (and",
-                *[f"      (at start {effect.pddl(negate=negate)})" for effect, negate in start_effects],
-                *[f"      (at end {effect.pddl(negate=negate)})" for effect, negate in end_effects],
+                *[f"      (at start {effect.pddl(negate=negate, close_extra_parens=1)}" for effect, negate in start_effects],
+                *[f"      (at end {effect.pddl(negate=negate, close_extra_parens=1)}" for effect, negate in end_effects],
                 "    )",
             ])
         lines.append("  )")
@@ -328,7 +329,7 @@ class CondEff(object):
     def depth(self):
         return max([rml.get_depth() for rml in self.condp.rmls | self.condn.rmls | set([self.eff])])
 
-    def pddl(self, spacing = '', negate = False):
+    def pddl(self, spacing = '', negate = False, close_extra_parens: int=0):
 
         # Set to true if you want to export effects in the style of epddl
         #  Note that this will not be compatible with classical planners
@@ -340,6 +341,7 @@ class CondEff(object):
             reason = "  ; #%s: <==%s== %s (%s)" % (self.id(), self.reason[0], self.reason[2].id(), self.reason[1])
         else:
             reason = "  ; #%s: origin" % self.id()
+        reason = ")" * close_extra_parens + reason
 
         if (not self.condp.rmls) and (not self.condn.rmls):
             if negate:

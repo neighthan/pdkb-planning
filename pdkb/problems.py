@@ -363,15 +363,15 @@ class ValidGeneration(Problem):
 
     def pddl(self):
         to_ret =  "(define (problem %s-prob)\n\n" % self.domain.name
-        to_ret += "    (:domain %s)\n\n" % self.domain.name
-        to_ret += "    (:init\n"
-        for (key, rml) in sorted([(str(r), r) for r in self.init]):
-            to_ret += "        (%s)\n" % rml.pddl()
-        to_ret += "    )\n\n"
-        to_ret += "    (:goal (and\n"
-        for (key, rml) in sorted([(str(r), r) for r in self.goal]):
-            to_ret += "        (%s)\n" % rml.pddl()
-        to_ret += "    ))\n"
+        to_ret += "  (:domain %s)\n\n" % self.domain.name
+        to_ret += "  (:init\n"
+        for rml in sorted(self.init, key=lambda r: str(r)):
+            to_ret += "    (%s)\n" % rml.pddl()
+        to_ret += "  )\n\n"
+        to_ret += "  (:goal (and\n"
+        for rml in sorted(self.goal, key=lambda r: str(r)):
+            to_ret += "    (%s)\n" % rml.pddl()
+        to_ret += "  ))\n"
         to_ret += ')'
 
         return to_ret
