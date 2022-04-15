@@ -184,6 +184,13 @@ class Action(object):
         return "\n".join(lines)
 
 
+class DurativeAction(Action):
+    def __init__(self, name, depth, agents, props, akprops, derived_cond, extra_ancillary=[], duration=None):
+        super().__init__(name, depth, agents, props, akprops, derived_cond, extra_ancillary)
+        assert duration is not None
+        self.duration = duration
+
+
 class CondEff(object):
 
     def __init__(self, condp, condn, lit, cond_ma_cond, reason=None):

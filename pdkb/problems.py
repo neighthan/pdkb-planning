@@ -1,12 +1,12 @@
-
 import os, time
+from copy import deepcopy
 
 from pdkb.test.utils import read_file, write_file, run_command, parse_output_ipc
 
 from pdkb.rml import parse_rml, Literal
 from pdkb.kd45 import PDKB, project
-from pdkb.actions import Action
-from pdkb.pddl.grounder import GroundProblem
+from pdkb.actions import Action, DurativeAction
+from pdkb.pddl.grounder import DurativeOperator, GroundProblem
 import pdkb
 
 
@@ -45,20 +45,34 @@ def prim2rml(prim, parse = True):
 
 
 def convert_action(action, depth, agents, props, akprops):
-
     if str(action.dcond) == '(always)':
-        act = Action(action.name, depth, agents, props, akprops, True)
-
+        dcond = True
     elif str(action.dcond) == '(never)':
-        act = Action(action.name, depth, agents, props, akprops, False)
-
+        dcond = False
     elif action.dcond:
-        act = Action(action.name, depth, agents, props, akprops, parse_ma_cond(action.dcond))
-
+        dcond = parse_ma_cond(action.dcond)
     else:
         assert False, "Error for action %s. You need to specify the type of derived condition ('always', 'never', or 'custom')." % action.name
 
+    if isinstance(action, DurativeOperator):
+        action_start = deepcopy(action)
+        action_end = deepcopy(action)
+        action_start.precondition.args = [p for p in action.precondition.args if p.time == "at-start"]
+        action_end.precondition.args = [p for p in action.precondition.args if p.time == "at-end"]
+        action_start.effect.args = [e for e in action.effect.args if e.time == "at-start"]
+        action_end.effect.args = [e for e in action.effect.args if e.time == "at-end"]
+        action_start.name = action.name + "_start"
+        action_end.name = action.name + "_end"
+        act_start = DurativeAction(action_start.name, depth, agents, props, akprops, dcond, duration=action.duration)
+        act_end = DurativeAction(action_end.name, depth, agents, props, akprops, dcond, duration=action.duration)
+        _convert_action(act_start, action_start, depth, agents, props, akprops)
+        _convert_action(act_end, action_end, depth, agents, props, akprops)
+        return [act_start, act_end]
+    act = Action(action.name, depth, agents, props, akprops, dcond)
+    _convert_action(act, action, depth, agents, props, akprops)
+    return [act]
 
+def _convert_action(act, action, depth, agents, props, akprops):
     assert isinstance(action.precondition, pdkb.pddl.formula.And)
     for pre in action.precondition.args:
         act.add_pre(prim2rml(pre), negate=isinstance(pre, pdkb.pddl.formula.Not))
@@ -101,7 +115,7 @@ def convert_action(action, depth, agents, props, akprops):
                     act.add_neg_effect(condp, condn, prim2rml(eff))
                 else:
                     act.add_pos_effect(condp, condn, prim2rml(eff))
-    return act
+
 
 
 def parse_problem(prob, domain):
@@ -202,8 +216,10 @@ def parse_pdkbddl(pdkbddl_file):
     props = [parse_rml('_'.join(str(p)[1:-1].split())) for p in fluents]
     akprops = [parse_rml('_'.join(str(p)[1:-1].split())) for p in akfluents]
 
+
+    converted_actions = [act for a in prob.operators for act in convert_action(a, prob.depth, prob.agents, props, akprops)]
     domain = Domain(prob.agents, props, akprops,
-                    [convert_action(a, prob.depth, prob.agents, props, akprops) for a in prob.operators],
+                    converted_actions,
                     prob.depth, prob.types, prob.domain_name)
 
     return parse_problem(prob, domain)
@@ -316,11 +332,11 @@ class ValidGeneration(Problem):
 
         # Solve the problem
         planner_path = os.path.dirname(os.path.abspath(__file__))
-        
+
         # chosen_planner = 'bfws' # Can use bfs_f, siw, siw-then-bfsf, or bfws
         # planner_options = '--k-M-BFWS 2 --max_novelty 1' # make sure they make sense with the planner choice
         # planner_cmd = "%s/planners/%s --domain pdkb-domain.pddl --problem pdkb-problem.pddl --output pdkb-plan.txt %s" % (planner_path, chosen_planner, planner_options)
-        
+
         if old_planner:
             planner_cmd = "%s/planners/siw-then-bfsf --domain pdkb-domain.pddl --problem pdkb-problem.pddl --output pdkb-plan.txt" % planner_path
         else:
