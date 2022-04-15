@@ -303,7 +303,7 @@ class PDKB(KB):
     def relevant_output(self):
         """
         Computes the unique information of the KB.
-        
+
         Ignores disjunctive trivial belief like every agent either believes something or they don't.
         """
         newRMLs = set()

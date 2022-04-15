@@ -152,16 +152,36 @@ class Action(object):
             self.pre.add_rml(rml)
 
     def pddl(self):
-        toRet =  "    (:action %s" % self.name
-        toRet += "\n        :precondition (and %s)" % '\n                           '.join(["(%s)" % rml.pddl() for rml in self.pre] + ["(not (%s))" % rml.pddl() for rml in self.npre])
+        lines = [
+            f"  (:action {self.name}",
+            "    :precondition (and",
+            *[f"      ({rml.pddl()})" for rml in self.pre],
+            *[f"      (not ({rml.pddl()}))" for rml in self.npre],
+            "    )",
+        ]
         if len(self.effs) > 1:
-            toRet += "\n\n        :effect (oneof %s)" % '\n\n\n                       '.join(["(and\n%s)" % '\n\n'.join([cond.pddl('                           ') for cond in eff[0]] + \
-                                                                                                                        [cond.pddl('                           ', True) for cond in eff[1]]) for eff in self.effs])
+            # haven't tested the updated to effects with oneof; if there's an issue here,
+            # rollback to the old version
+            lines.append("\n    :effect (oneof")
+            for pos_eff, neg_eff in self.effs:
+                lines.extend([
+                    "      (and",
+                    *[cond.pddl(" " * 8) for cond in pos_eff],
+                    *[cond.pddl(" " * 8, negate=True) for cond in neg_eff],
+                    "      )",
+                ])
+            lines.append("    )")
         else:
-            toRet += "\n        :effect (and\n%s)" % '\n\n'.join([cond.pddl('                    ') for cond in [i[1] for i in sorted([(e.id(), e) for e in self.effs[0][0]])]] + \
-                                                                 [cond.pddl('                    ', True) for cond in [i[1] for i in sorted([(e.id(), e) for e in self.effs[0][1]])]])
-        toRet += ")"
-        return toRet
+            pos_effects = sorted(self.effs[0][0], key=lambda e: e.id())
+            neg_effects = sorted(self.effs[0][1], key=lambda e: e.id())
+            effects = [(e, False) for e in pos_effects] + [(e, True) for e in neg_effects]
+            lines.extend([
+                "\n    :effect (and",
+                *[effect.pddl("      ", negate=negate) for effect, negate in effects],
+                "    )",
+            ])
+        lines.append("  )")
+        return "\n".join(lines)
 
 
 class CondEff(object):
@@ -268,21 +288,21 @@ class CondEff(object):
         delim = '\n' + spacing + '           '
 
         if self.reason:
-            reason = spacing + "; #%s: <==%s== %s (%s)\n" % (self.id(), self.reason[0], self.reason[2].id(), self.reason[1])
+            reason = "  ; #%s: <==%s== %s (%s)" % (self.id(), self.reason[0], self.reason[2].id(), self.reason[1])
         else:
-            reason = spacing + "; #%s: origin\n" % self.id()
+            reason = "  ; #%s: origin" % self.id()
 
         if (not self.condp.rmls) and (not self.condn.rmls):
             if negate:
                 if EPDDL:
-                    return reason + spacing + "<{(True)} {(not (%s))}>" % self.eff.pddl()
+                    return spacing + "<{(True)} {(not (%s))}>" % self.eff.pddl() + reason
                 else:
-                    return reason + spacing + "(not (%s))" % self.eff.pddl()
+                    return spacing + "(not (%s))" % self.eff.pddl() + reason
             else:
                 if EPDDL:
-                    return reason + spacing + "<{(True)} {(%s)}>" % self.eff.pddl()
+                    return spacing + "<{(True)} {(%s)}>" % self.eff.pddl() + reason
                 else:
-                    return reason + spacing + "(%s)" % self.eff.pddl()
+                    return spacing + "(%s)" % self.eff.pddl() + reason
 
         cond_size = len(self.condp) + len(self.condn)
         condition = delim.join(["(%s)" % rml.pddl() for rml in self.condp] + \
@@ -292,14 +312,14 @@ class CondEff(object):
 
         if negate:
             if EPDDL:
-                return reason + spacing + "<{%s}\n%s      {(not (%s))}>" % (condition, spacing, self.eff.pddl())
+                return spacing + "<{%s}\n%s      {(not (%s))}>" % (condition, spacing, self.eff.pddl()) + reason
             else:
-                return reason + spacing + "(when (and %s)\n%s      (not (%s)))" % (condition, spacing, self.eff.pddl())
+                return spacing + "(when (and %s)\n%s      (not (%s)))" % (condition, spacing, self.eff.pddl()) + reason
         else:
             if EPDDL:
-                return reason + spacing + "<{%s}\n%s      {(%s)}>" % (condition, spacing, self.eff.pddl())
+                return spacing + "<{%s}\n%s      {(%s)}>" % (condition, spacing, self.eff.pddl()) + reason
             else:
-                return reason + spacing + "(when (and %s)\n%s      (%s))" % (condition, spacing, self.eff.pddl())
+                return spacing + "(when (and %s)\n%s      (%s))" % (condition, spacing, self.eff.pddl()) + reason
 
 
 
