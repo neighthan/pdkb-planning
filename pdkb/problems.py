@@ -507,9 +507,9 @@ class Domain:
         pdkb = PDKB(self.depth, self.agents, self.props)
         akpdkb = PDKB(0, [], self.akprops)
 
-        to_ret =  "(define (domain %s)\n\n" % self.name
-        to_ret += "    (:requirements :strips :conditional-effects)\n\n"
-        to_ret += "    (:predicates\n"
+        to_ret =  f"(define (domain {self.name})\n\n"
+        to_ret += "  (:requirements :strips :conditional-effects)\n\n"
+        to_ret += "  (:predicates\n"
 
         PROPS = pdkb.all_rmls | akpdkb.all_rmls
         assert 0 == len(pdkb.all_rmls & akpdkb.all_rmls), "Error: Detected overlap in regular fluents and always known fluents"
@@ -520,13 +520,13 @@ class Domain:
         print("# Effs: %d" % sum([a.num_effs() for a in self.actions]))
         print("Depth: %d" % self.depth)
 
-        for (key, rml) in sorted([(str(r), r) for r in PROPS]):
-            to_ret += "        (%s)\n" % rml.pddl()
+        for rml in sorted(PROPS, key=lambda p: str(p)):
+            to_ret += f"    ({rml.pddl()})\n"
 
-        to_ret += "    )\n\n"
+        to_ret += "  )\n\n"
 
-        for (key, act) in sorted([(a.name, a) for a in self.actions]):
-            to_ret += "%s\n\n" % act.pddl()
+        for act in sorted(self.actions, key=lambda a: a.name):
+            to_ret += f"{act.pddl()}\n"
 
         to_ret += ')'
 
