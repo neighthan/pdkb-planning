@@ -1,4 +1,6 @@
-from .formula import Formula
+from typing import Optional, Sequence, Tuple
+
+from .formula import And, Formula, Duration
 from .predicate import Predicate
 
 class Action (object):
@@ -133,3 +135,52 @@ class Action (object):
         print((lvl + 1) * "\t" + "Effect: " + str (self.effect))
 
         print((lvl + 1) * "\t" + "Observe: " + str(self.observe))
+
+
+class DurativeAction(Action):
+    """
+    (:durative-action name
+      :parameters (?p1 - type1 ?p2 - type2)
+      :duration (= ?duration 5)
+      :condition (and
+        (at start (obj-at ?s ?l1))
+      )
+      :effect (and
+        (at start (not (obj-at ?s ?l1)))
+        (at end (obj-at ?s ?l2))
+      )
+    )
+    """
+    def __init__ (
+        self,
+        name: str,
+        parameters: Sequence[Tuple[str, str]],
+        precondition: Optional[Formula],
+        observe: Optional[Predicate],
+        effect: Optional[Formula],
+        dcond: str,
+        duration: Duration,
+    ):
+        """
+        :param name: the action name
+        :param parameters: list of (variable name, variable type)
+        :param precondition: formula object
+                #TODO some actions have no precondition, set this to None
+        :param observe: predicate object (or None if the action is not a sensing action)
+        :param effect: formula object
+                #TODO some actions have no effects, set this to None
+        :param dcond: derive-condition status
+          (always, never, or some predicate like `at $agent$ loc1`)
+        """
+        _check_times_present(precondition, effect)
+        super().__init__(name, parameters, precondition, observe, effect, dcond)
+        self.duration = duration
+
+def _check_times_present(*formulas: Optional[Formula]):
+    times = {"at-start", "at-end", "over-all"}
+    for formula in formulas:
+        if formula is None: continue
+        if isinstance(formula, And):
+            assert formula.time == None
+            for arg in formula.args:
+                assert arg.time in times

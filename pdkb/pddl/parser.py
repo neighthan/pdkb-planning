@@ -1,8 +1,8 @@
 
 import sys
 from collections import OrderedDict
-from .formula import Formula, And, Primitive, Forall, When, Xor, Not, Oneof, Or
-from .action import Action
+from .formula import Formula, And, Primitive, Forall, When, Xor, Not, Oneof, Or, Duration
+from .action import Action, DurativeAction
 from .predicate import Predicate
 from .pddl_tree import PDDL_Tree
 from .utils import PDDL_Utils
@@ -296,7 +296,8 @@ class Problem(object):
                 # only need to do this once, obviously
                 break
 
-        self.actions = [self.to_action(c) for c in parse_tree.find_all(":action")]
+        all_actions = list(parse_tree.find_all(":action")) + list(parse_tree.find_all(":durative-action"))
+        self.actions = [self.to_action(a) for a in all_actions]
 
 
     def _get_supertypes(self, t, d):
@@ -438,6 +439,9 @@ class Problem(object):
         else:
             effect = None
 
+        if ":duration" in node:
+            duration = Duration(node[":duration"])
+            return DurativeAction(name, params, precond, observe, effect, dcond, duration)
         return Action(name, params, precond, observe, effect, dcond)
 
     def to_predicate(self, node, f='predicate', map=None):
@@ -548,6 +552,13 @@ class Problem(object):
             pred.agent_list = "%s%s %s" % (modality, ag, pred.agent_list)
 
             return pred
+
+        for time in ("at-start", "at-end", "over-all"):
+            if node.name == time:
+                assert len(node.children) == 1
+                node = self.to_formula(node.children[0], parameter_map)
+                node.time = time
+                return node
 
         if "and" == node.name:
             return And(args)

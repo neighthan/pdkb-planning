@@ -1,3 +1,4 @@
+from typing import Optional
 
 from .predicate import Predicate
 
@@ -24,7 +25,7 @@ class Formula(object):
                             object if there is a Oneof object
     """
 
-    def __init__(self, name, args):
+    def __init__(self, name, args, time: Optional[str]=None):
         """
             Inputs:
                 name:   Type of formula
@@ -36,6 +37,9 @@ class Formula(object):
             "args must be a list of Formula objects"
         self.name = name
         self.args = args
+        if time is not None:
+            print("TIME = ", time)
+        self.time = time
 
     def to_ground (self, fluent_dict):
         """Assert that this formula is actually ground.
@@ -464,3 +468,22 @@ class Primitive(Formula):
         """Informative string representation."""
 
         return str(self)
+
+class Duration:
+    """
+    (:duration (= ?duration 5))
+    (:duration (= ?duration (dist l1 l2)))
+    """
+    def __init__(self, duration_node):
+        eq_node = duration_node.children[0]
+        assert eq_node.name == "="
+        _, duration = eq_node.children
+        assert eq_node.children[0].name == "?duration"
+        if duration.children:
+            duration = f"({duration.name} {' '.join([c.name for c in duration.children])})"
+        else:
+            duration = duration.name
+        self.duration = duration
+
+    def __repr__(self):
+        return f"(= ?duration {self.duration})"

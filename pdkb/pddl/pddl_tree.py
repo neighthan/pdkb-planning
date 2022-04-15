@@ -108,7 +108,7 @@ class PDDL_Tree (object):
     def _alter_tree (root):
         """Alter tree to get correct semantic structure."""
 
-        alter_set = set([":precondition", ":effect", ":observe"])
+        alter_set = set([":precondition", ":effect", ":observe", ":duration"])
         i = 0
 
         while i < len (root.children):
@@ -188,4 +188,3 @@ class PDDL_Tree (object):
         contents = contents.replace(",", ",\n")
         #print contents
         return eval(contents)
-
