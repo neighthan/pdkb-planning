@@ -1,5 +1,5 @@
 from .parser import Problem
-from .action import Action
+from .action import Action, DurativeAction, _check_times_present
 from .formula import Primitive, Forall, When, And
 from .predicate import Predicate
 import itertools
@@ -76,7 +76,10 @@ class GroundProblem(Problem):
                 else:
                     p = Predicate (a.observe.name, None, a.observe.args)
                     observe = fluent_dict[hash (p)]
-                op = Operator (a.name, param, precond, observe, effect, a.dcond)
+                if isinstance(a, DurativeAction):
+                    op = DurativeOperator(a.name, param, precond, observe, effect, a.dcond, a.duration)
+                else:
+                    op = Operator (a.name, param, precond, observe, effect, a.dcond)
                 self.operators.add (op)
 
             self.init.to_ground (fluent_dict)
@@ -286,13 +289,14 @@ class GroundProblem(Problem):
         if formula is None:
             return None
 
+        new_formula = None
         if isinstance(formula, Primitive):
             new_prim = Primitive(self._predicate_to_fluent(formula.predicate, assignment, fluent_dict))
             new_prim.agent_list = formula.agent_list
             new_prim.negated_rml = formula.negated_rml
             for k in assignment:
                 new_prim.agent_list = new_prim.agent_list.replace(k, assignment[k])
-            return new_prim
+            new_formula = new_prim
         elif isinstance(formula, Forall):
 
             new_conjuncts = []
@@ -302,13 +306,15 @@ class GroundProblem(Problem):
                 for k in assignment:
                     new_assignment[k] = assignment[k]
                 new_conjuncts.append(self._partial_ground_formula(formula.args[0], new_assignment, fluent_dict))
-            return And(new_conjuncts)
+            new_formula = And(new_conjuncts)
 
         elif isinstance(formula, When):
-            return When(self._partial_ground_formula(formula.condition, assignment, fluent_dict),
+            new_formula = When(self._partial_ground_formula(formula.condition, assignment, fluent_dict),
                         self._partial_ground_formula(formula.result, assignment, fluent_dict))
         else:
-            return type(formula)([self._partial_ground_formula(arg, assignment, fluent_dict) for arg in formula.args])
+            new_formula = type(formula)([self._partial_ground_formula(arg, assignment, fluent_dict) for arg in formula.args])
+        new_formula.time = formula.time
+        return new_formula
 
     def _action_to_operator(self, action, assignment, fluent_dict):
         """
@@ -332,6 +338,8 @@ class GroundProblem(Problem):
         op_observe = self._predicate_to_fluent(action.observe, assignment, fluent_dict)
         op_effect = self._partial_ground_formula(action.effect, assignment, fluent_dict)
         op_dcond = self._partial_ground_formula(action.dcond, assignment, fluent_dict)
+        if isinstance(action, DurativeAction):
+            return DurativeOperator(op_name, op_params, op_precond, op_observe, op_effect, op_dcond, action.duration)
         return Operator(op_name, op_params, op_precond, op_observe, op_effect, op_dcond)
 
     def _create_operators(self, fluent_dict):
@@ -492,3 +500,10 @@ class Operator(Action):
         print((lvl + 1) * "\t" + "Precondition: " + str(self.precondition))
         print((lvl + 1) * "\t" + "Effect: " + str(self.effect))
         print((lvl + 1) * "\t" + "Observe: " + str(self.observe))
+
+
+class DurativeOperator(Operator):
+    def __init__(self, name, parameters, precondition, observe, effect, dcond, duration):
+        _check_times_present(precondition, effect)
+        super().__init__(name, parameters, precondition, observe, effect, dcond)
+        self.duration = duration
