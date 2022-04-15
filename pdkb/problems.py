@@ -1,11 +1,12 @@
 import os, time
 from copy import deepcopy
+from typing import List, Sequence, Union
 
 from pdkb.test.utils import read_file, write_file, run_command, parse_output_ipc
 
 from pdkb.rml import parse_rml, Literal
 from pdkb.kd45 import PDKB, project
-from pdkb.actions import Action, DurativeAction
+from pdkb.actions import Action, CombinedDurativeAction, DurativeAction
 from pdkb.pddl.grounder import DurativeOperator, GroundProblem
 import pdkb
 
@@ -525,12 +526,27 @@ class Domain:
 
         to_ret += "  )\n\n"
 
-        for act in sorted(self.actions, key=lambda a: a.name):
-            to_ret += f"{act.pddl()}\n"
+        actions = combine_actions(self.actions)
+        for act in sorted(actions, key=lambda a: a.name):
+            to_ret += f"{act.pddl()}\n\n"
 
         to_ret += ')'
 
         return to_ret
+
+
+def combine_actions(actions: Sequence[Action]) -> List[Union[Action, CombinedDurativeAction]]:
+    combined_actions = []
+    action_idxs = {}
+    for i, action in enumerate(actions):
+        name = action.name.replace("_start", "").replace("_end", "")
+        action_idxs.setdefault(name, []).append(i)
+    for name, idxs in action_idxs.items():
+        if len(idxs) == 1: # non-durative
+            combined_actions.append(actions[idxs[0]])
+            continue
+        combined_actions.append(CombinedDurativeAction(*[actions[idx] for idx in idxs]))
+    return combined_actions
 
 
 PROBLEM_TYPES = {'valid_generation': ValidGeneration,

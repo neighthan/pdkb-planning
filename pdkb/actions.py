@@ -191,6 +191,48 @@ class DurativeAction(Action):
         self.duration = duration
 
 
+class CombinedDurativeAction:
+    """Only used for outputting PDDL; not an Action subclass."""
+    def __init__(self, act1: DurativeAction, act2: DurativeAction):
+        if act1.name.endswith("_start"):
+            self.start_act = act1
+            self.end_act = act2
+        else:
+            self.start_act = act2
+            self.end_act = act1
+        self.name = self.start_act.name.replace("_start", "")
+
+    def pddl(self) -> str:
+        lines = [
+            f"  (:durative-action {self.name}",
+            "    :precondition (and",
+            *[f"      (at start ({rml.pddl()}))" for rml in self.start_act.pre],
+            *[f"      (at start (not ({rml.pddl()})))" for rml in self.start_act.npre],
+            *[f"      (at end ({rml.pddl()}))" for rml in self.end_act.pre],
+            *[f"      (at end (not ({rml.pddl()})))" for rml in self.end_act.npre],
+            "    )",
+        ]
+        if len(self.start_act.effs) > 1 or len(self.end_act.effs) > 1:
+            raise NotImplementedError(
+                "Durative actions don't support non-deterministic effects yet."
+            )
+        else:
+            pos_start_effects = sorted(self.start_act.effs[0][0], key=lambda e: e.id())
+            neg_start_effects = sorted(self.start_act.effs[0][1], key=lambda e: e.id())
+            pos_end_effects = sorted(self.end_act.effs[0][0], key=lambda e: e.id())
+            neg_end_effects = sorted(self.end_act.effs[0][1], key=lambda e: e.id())
+            start_effects = [(e, False) for e in pos_start_effects] + [(e, True) for e in neg_start_effects]
+            end_effects = [(e, False) for e in pos_end_effects] + [(e, True) for e in neg_end_effects]
+            lines.extend([
+                "\n    :effect (and",
+                *[f"      (at start {effect.pddl(negate=negate)})" for effect, negate in start_effects],
+                *[f"      (at end {effect.pddl(negate=negate)})" for effect, negate in end_effects],
+                "    )",
+            ])
+        lines.append("  )")
+        return "\n".join(lines)
+
+
 class CondEff(object):
 
     def __init__(self, condp, condn, lit, cond_ma_cond, reason=None):
