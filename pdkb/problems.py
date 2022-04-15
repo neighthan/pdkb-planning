@@ -126,9 +126,8 @@ def parse_problem(prob, domain):
     return PROBLEM_TYPES[prob.task](prob, domain)
 
 
-def read_pdkbddl_file(fname):
-
-    lines = read_file(fname)
+def read_pdkbddl_file(fname: str, input_is_file: bool=True):
+    lines = read_file(fname) if input_is_file else [l.strip() for l in fname.split("\n")]
 
     found = True
     count = 0
@@ -198,9 +197,8 @@ def read_pdkbddl_file(fname):
     return lines
 
 
-def parse_pdkbddl(pdkbddl_file):
-
-    lines = read_pdkbddl_file(pdkbddl_file)
+def parse_pdkbddl(pdkbddl_file, input_is_file: bool=True):
+    lines = read_pdkbddl_file(pdkbddl_file, input_is_file)
 
     prob_index = -1
     for i in range(len(lines)):

@@ -14,11 +14,17 @@ def cleanup():
     os.system('rm -f execution.details')
 
 
-def solve(pdkbddl_file, old_planner=False):
+def convert_to_pddl(pdkbdll: str):
+    problem = parse_pdkbddl(pdkbdll, input_is_file=False)
+    problem.preprocess()
+    return {"domain": problem.domain.pddl(), "problem": problem.pddl()}
+
+
+def solve(pdkbddl_file, old_planner=False, use_cache: bool=True):
 
     print()
 
-    if not os.path.isdir('.problem-cache'):
+    if use_cache and not os.path.isdir('.problem-cache'):
         os.mkdir('.problem-cache')
 
     t_start = time.time()
@@ -30,16 +36,19 @@ def solve(pdkbddl_file, old_planner=False):
 
     print("Preprocessing problem...", end=' ')
     sys.stdout.flush()
-    prob_hash = hash(pickle.dumps(problem))
-    fname = ".problem-cache/%s" % str(prob_hash)
-    if os.path.isfile(fname) and not os.path.isfile('.nocache'):
-        problem = pickle.load(open(fname, 'r'))
-        print("done! (from cache)")
+    if use_cache:
+        prob_hash = hash(pickle.dumps(problem))
+        fname = ".problem-cache/%s" % str(prob_hash)
+        if os.path.isfile(fname) and not os.path.isfile('.nocache'):
+            problem = pickle.load(open(fname, 'r'))
+            print("done! (from cache)")
+        else:
+            problem.preprocess()
+            with open(fname, 'wb') as f:
+                pickle.dump(problem, f, 2)
+            print("done!")
     else:
         problem.preprocess()
-        with open(fname, 'wb') as f:
-            pickle.dump(problem, f, 2)
-        print("done!")
 
     print("Solving problem...", end=' ')
     sys.stdout.flush()
