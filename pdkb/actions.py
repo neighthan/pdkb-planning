@@ -12,7 +12,7 @@ DEBUG = False
 
 class Action(object):
 
-    def __init__(self, name, depth, agents, props, akprops, derived_cond, extra_ancillary=[]):
+    def __init__(self, name, depth, agents, props, akprops, derived_cond, extra_ancillary=()):
         self.name = name
         self.depth = depth
         self.agents = agents
@@ -28,7 +28,7 @@ class Action(object):
         self.COMPILERS_POS = []
         self.COMPILERS_NEG = []
 
-        for mod_name in ancillary.compute_modules() + extra_ancillary:
+        for mod_name in ancillary.compute_modules() + list(extra_ancillary):
             mod = importlib.import_module(mod_name)
             self.COMPILERS_POS.extend(mod.COMPILERS_POS)
             self.COMPILERS_NEG.extend(mod.COMPILERS_NEG)
