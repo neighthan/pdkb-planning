@@ -154,6 +154,7 @@ class Action(object):
     def pddl(self):
         lines = [
             f"  (:action {self.name}",
+            "    :parameters ()",
             "    :precondition (and",
             *[f"      ({rml.pddl()})" for rml in self.pre],
             *[f"      (not ({rml.pddl()}))" for rml in self.npre],
