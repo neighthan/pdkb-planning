@@ -507,7 +507,7 @@ class Domain:
         akpdkb = PDKB(0, [], self.akprops)
 
         to_ret =  f"(define (domain {self.name})\n\n"
-        to_ret += "  (:requirements :strips :conditional-effects)\n\n"
+        to_ret += "  (:requirements :strips :conditional-effects :durative-actions)\n\n"
         to_ret += "  (:predicates\n"
 
         PROPS = pdkb.all_rmls | akpdkb.all_rmls

@@ -202,11 +202,14 @@ class CombinedDurativeAction:
             self.start_act = act2
             self.end_act = act1
         self.name = self.start_act.name.replace("_start", "")
+        self.duration = act1.duration
 
     def pddl(self) -> str:
         lines = [
             f"  (:durative-action {self.name}",
-            "    :precondition (and",
+            "    :parameters ()",
+            f"    :duration {self.duration}",
+            "    :condition (and",
             *[f"      (at start ({rml.pddl()}))" for rml in self.start_act.pre],
             *[f"      (at start (not ({rml.pddl()})))" for rml in self.start_act.npre],
             *[f"      (at end ({rml.pddl()}))" for rml in self.end_act.pre],
