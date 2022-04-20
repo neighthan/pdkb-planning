@@ -8,6 +8,9 @@ from .pddl_tree import PDDL_Tree
 from .utils import PDDL_Utils
 
 
+class ParseError(Exception):
+    pass
+
 class Problem(object):
     """
     A problem instance.
@@ -252,8 +255,10 @@ class Problem(object):
             if child.name != ":durative-action":
                 continue
             child[":condition"].name = ":precondition"
-            assert child[":precondition"].children[0].name == "and", "Use (and) for durative action condition."
-            assert child[":effect"].children[0].name == "and", "Use (and) for durative action effect."
+            if child[":precondition"].children[0].name != "and":
+                raise ParseError("Use (and) for durative action condition.")
+            if child[":effect"].children[0].name != "and":
+                raise ParseError("Use (and) for durative action effect.")
             for subtree in (child[":precondition"], child[":effect"]):
                 for predicate in subtree.children[0].children:
                     if predicate.name == "at":
@@ -268,7 +273,13 @@ class Problem(object):
                         predicate.children.pop(0)
                         predicate.name = f"{predicate.name}-all"
                     else:
-                        raise RuntimeError(f"Unexpected effect:\n{predicate.print_tree(print_=False)}", )
+                        raise ParseError(
+                            "Error with time of predicate:\n"
+                            f"{predicate.print_tree(print_=False)}"
+                        )
+            dcond_idx = [n.name for n in child.children].index(":derive-condition")
+            if child.children[dcond_idx+1].name != "always":
+                raise ParseError("Durative actions must have :derive-condition always.")
 
         assert "domain" in parse_tree, "Domain must have a name"
         self.domain_name = parse_tree ["domain"].named_children ()[0]
