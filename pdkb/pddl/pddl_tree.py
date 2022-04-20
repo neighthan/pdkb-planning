@@ -72,13 +72,16 @@ class PDDL_Tree (object):
 
         return self.print_tree ()
 
-    def print_tree (self, lvl=0):
+    def print_tree (self, lvl=0, print_=True):
         """Print the entire tree to the console."""
 
-        print(PDDL_Tree.TAB * lvl + str(self.name))
+        tree_str = PDDL_Tree.TAB * lvl + str(self.name) + "\n"
+        if print_:
+            print(tree_str, end="")
 
         for child in self.children:
-            child.print_tree(lvl + 1)
+            tree_str += child.print_tree(lvl + 1, print_)
+        return tree_str
 
     def has_children (self):
         """Return True iff this node has children. """
@@ -108,7 +111,7 @@ class PDDL_Tree (object):
     def _alter_tree (root):
         """Alter tree to get correct semantic structure."""
 
-        alter_set = set([":precondition", ":effect", ":observe", ":duration"])
+        alter_set = set([":precondition", ":condition", ":effect", ":observe", ":duration"])
         i = 0
 
         while i < len (root.children):

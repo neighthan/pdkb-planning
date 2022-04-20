@@ -247,6 +247,29 @@ class Problem(object):
 
         parse_tree = PDDL_Tree.create(f_domain)
 
+        # durative action conversions to make later processing easier
+        for child in parse_tree.children:
+            if child.name != ":durative-action":
+                continue
+            child[":condition"].name = ":precondition"
+            assert child[":precondition"].children[0].name == "and", "Use (and) for durative action condition."
+            assert child[":effect"].children[0].name == "and", "Use (and) for durative action effect."
+            for subtree in (child[":precondition"], child[":effect"]):
+                for predicate in subtree.children[0].children:
+                    if predicate.name == "at":
+                        time = predicate.children[0].name
+                        assert time in ("start", "end")
+                        assert not predicate.children[0].children
+                        predicate.children.pop(0)
+                        predicate.name = f"{predicate.name}-{time}"
+                    elif predicate.name == "over":
+                        assert predicate.children[0].name == "all"
+                        assert not predicate.children[0].children == "all"
+                        predicate.children.pop(0)
+                        predicate.name = f"{predicate.name}-all"
+                    else:
+                        raise RuntimeError(f"Unexpected effect:\n{predicate.print_tree(print_=False)}", )
+
         assert "domain" in parse_tree, "Domain must have a name"
         self.domain_name = parse_tree ["domain"].named_children ()[0]
 
