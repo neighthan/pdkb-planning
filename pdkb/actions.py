@@ -1,6 +1,7 @@
 
 import os, glob, importlib
 from itertools import combinations_with_replacement as comb_with_repl
+from typing import Sequence
 
 from pdkb.rml import Belief, Possible, RML, Literal, neg, parse_rml
 from pdkb.kd45 import PDKB, kd_closure
@@ -194,15 +195,13 @@ class DurativeAction(Action):
 
 class CombinedDurativeAction:
     """Only used for outputting PDDL; not an Action subclass."""
-    def __init__(self, act1: DurativeAction, act2: DurativeAction):
-        if act1.name.endswith("_start"):
-            self.start_act = act1
-            self.end_act = act2
-        else:
-            self.start_act = act2
-            self.end_act = act1
+    def __init__(self, actions: Sequence[DurativeAction]):
+        times = [a.name.split("_")[-1] for a in actions]
+        self.start_act = actions[times.index("start")]
+        self.overall_act = actions[times.index("overall")]
+        self.end_act = actions[times.index("end")]
         self.name = self.start_act.name.replace("_start", "")
-        self.duration = act1.duration
+        self.duration = self.start_act.duration
 
     def pddl(self) -> str:
         lines = [
@@ -212,10 +211,14 @@ class CombinedDurativeAction:
             "    :condition (and",
             *[f"      (at start ({rml.pddl()}))" for rml in self.start_act.pre],
             *[f"      (at start (not ({rml.pddl()})))" for rml in self.start_act.npre],
+            *[f"      (over all ({rml.pddl()}))" for rml in self.overall_act.pre],
+            *[f"      (over all (not ({rml.pddl()})))" for rml in self.overall_act.npre],
             *[f"      (at end ({rml.pddl()}))" for rml in self.end_act.pre],
             *[f"      (at end (not ({rml.pddl()})))" for rml in self.end_act.npre],
             "    )",
         ]
+
+        assert self.overall_act.effs == [([], [])]
         if len(self.start_act.effs) > 1 or len(self.end_act.effs) > 1:
             raise NotImplementedError(
                 "Durative actions don't support non-deterministic effects yet."

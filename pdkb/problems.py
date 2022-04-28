@@ -57,18 +57,24 @@ def convert_action(action, depth, agents, props, akprops):
 
     if isinstance(action, DurativeOperator):
         action_start = deepcopy(action)
+        action_overall = deepcopy(action)
         action_end = deepcopy(action)
         action_start.precondition.args = [p for p in action.precondition.args if p.time == "at-start"]
+        action_overall.precondition.args = [p for p in action.precondition.args if p.time == "over-all"]
         action_end.precondition.args = [p for p in action.precondition.args if p.time == "at-end"]
         action_start.effect.args = [e for e in action.effect.args if e.time == "at-start"]
+        action_overall.effect.args = [e for e in action.effect.args if e.time == "over-all"]
         action_end.effect.args = [e for e in action.effect.args if e.time == "at-end"]
         action_start.name = action.name + "_start"
+        action_overall.name = action.name + "_overall"
         action_end.name = action.name + "_end"
         act_start = DurativeAction(action_start.name, depth, agents, props, akprops, dcond, duration=action.duration)
+        act_overall = DurativeAction(action_overall.name, depth, agents, props, akprops, dcond, duration=action.duration)
         act_end = DurativeAction(action_end.name, depth, agents, props, akprops, dcond, duration=action.duration)
         _convert_action(act_start, action_start, depth, agents, props, akprops)
+        _convert_action(act_overall, action_overall, depth, agents, props, akprops)
         _convert_action(act_end, action_end, depth, agents, props, akprops)
-        return [act_start, act_end]
+        return [act_start, act_overall, act_end]
     act = Action(action.name, depth, agents, props, akprops, dcond)
     _convert_action(act, action, depth, agents, props, akprops)
     return [act]
@@ -501,7 +507,7 @@ class Domain:
         self.name = name
         self.types = types
 
-    def pddl(self):
+    def pddl(self, verbose: bool=False):
 
         pdkb = PDKB(self.depth, self.agents, self.props)
         akpdkb = PDKB(0, [], self.akprops)
@@ -513,11 +519,12 @@ class Domain:
         PROPS = pdkb.all_rmls | akpdkb.all_rmls
         assert 0 == len(pdkb.all_rmls & akpdkb.all_rmls), "Error: Detected overlap in regular fluents and always known fluents"
 
-        print("\n\n# Agents: %d" % len(self.agents))
-        print("# Props: %d" % len(PROPS))
-        print("# Acts: %d" % len(self.actions))
-        print("# Effs: %d" % sum([a.num_effs() for a in self.actions]))
-        print("Depth: %d" % self.depth)
+        if verbose:
+            print("\n\n# Agents: %d" % len(self.agents))
+            print("# Props: %d" % len(PROPS))
+            print("# Acts: %d" % len(self.actions))
+            print("# Effs: %d" % sum([a.num_effs() for a in self.actions]))
+            print("Depth: %d" % self.depth)
 
         for rml in sorted(PROPS, key=lambda p: str(p)):
             to_ret += f"    ({rml.pddl()})\n"
@@ -537,13 +544,13 @@ def combine_actions(actions: Sequence[Action]) -> List[Union[Action, CombinedDur
     combined_actions = []
     action_idxs = {}
     for i, action in enumerate(actions):
-        name = action.name.replace("_start", "").replace("_end", "")
+        name = action.name.replace("_start", "").replace("_end", "").replace("_overall", "")
         action_idxs.setdefault(name, []).append(i)
     for name, idxs in action_idxs.items():
         if len(idxs) == 1: # non-durative
             combined_actions.append(actions[idxs[0]])
             continue
-        combined_actions.append(CombinedDurativeAction(*[actions[idx] for idx in idxs]))
+        combined_actions.append(CombinedDurativeAction([actions[idx] for idx in idxs]))
     return combined_actions
 
 
