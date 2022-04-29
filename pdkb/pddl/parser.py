@@ -306,7 +306,10 @@ class Problem(object):
             self.types = set([Predicate.OBJECT])
             self.parent_types = {Predicate.OBJECT: None}
 
-        self.agents = [a.name for a in parse_tree[":agents"].children]
+        if ":agents" in parse_tree:
+            self.agents = [a.name for a in parse_tree[":agents"].children]
+        else:
+            self.agents = []
         self.types.add('agent')
         self.parent_types['agent'] = None
         self._add_objects([(ag, 'agent') for ag in self.agents])
@@ -429,10 +432,22 @@ class Problem(object):
             self.init = And([self.to_formula(c, obj_map) for c in parse_tree[":init"].children])
 
         # Parse the multiagent stuff
-        self.task = parse_tree[":task"].children[0].name
-        self.depth = int(parse_tree[":depth"].children[0].name)
-        self.projection = [a.name for a in parse_tree[":projection"].children]
-        self.init_type = parse_tree[":init-type"].children[0].name
+        if ":task" in parse_tree:
+            self.task = parse_tree[":task"].children[0].name
+        else:
+            self.task = "valid_generation"
+        if ":depth" in parse_tree:
+            self.depth = int(parse_tree[":depth"].children[0].name)
+        else:
+            self.depth = 1
+        if ":projection" in parse_tree:
+            self.projection = [a.name for a in parse_tree[":projection"].children]
+        else:
+            self.projection = []
+        if ":init-type" in parse_tree:
+            self.init_type = parse_tree[":init-type"].children[0].name
+        else:
+            self.init_type = "complete"
         self.plan = []
         if ':plan' in parse_tree:
             self.plan = ['_'.join(map(str, [x.name] + [y.name for y in x.children])) for x in parse_tree[":plan"].children]
