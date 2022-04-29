@@ -1,4 +1,5 @@
 import os, time
+import re
 from copy import deepcopy
 from typing import List, Sequence, Union
 
@@ -191,10 +192,16 @@ def read_pdkbddl_file(fname: str, input_is_file: bool=True):
         return new_line
 
     def replace_belief(line):
+        if not re.match(r"\[\s*?[A-Za-z][A-Za-z0-9_\-]*?\s*?\]", line):
+            return line
         return replace_modal('[', ']', 'B', line)
     def replace_possible(line):
+        if not re.match(r"\<\s*?[A-Za-z][A-Za-z0-9_\-]*?\s*?\>", line):
+            return line
         return replace_modal('<', '>', 'P', line)
     def replace_alwaysknow(line):
+        if "{AK}" not in line:
+            return line
         assert '%' not in line, "Error: Custom character % must be avoided"
         assert '&' not in line, "Error: Custom character & must be avoided"
         return replace_modal('&', '%', 'AK', line.replace('{AK}','&%'))
