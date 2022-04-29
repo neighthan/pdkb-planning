@@ -202,6 +202,16 @@ class CombinedDurativeAction:
         self.end_act = actions[times.index("end")]
         self.name = self.start_act.name.replace("_start", "")
         self.duration = self.start_act.duration
+        for rml in self.overall_act.pre:
+            if rml in self.start_act.pre:
+                self.start_act.pre.remove_rml(rml)
+            if rml in self.end_act.pre:
+                self.end_act.pre.remove_rml(rml)
+        for rml in self.overall_act.npre:
+            if rml in self.start_act.npre:
+                self.start_act.npre.remove_rml(rml)
+            if rml in self.end_act.npre:
+                self.end_act.npre.remove_rml(rml)
 
     def pddl(self) -> str:
         lines = [
