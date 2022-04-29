@@ -470,20 +470,26 @@ class Primitive(Formula):
         return str(self)
 
 class Duration:
-    """
-    (:duration (= ?duration 5))
-    (:duration (= ?duration (dist l1 l2)))
-    """
+    # tested on durations like
+    # (:duration (= ?duration 5))
+    # (:duration (>= ?duration (dist l1 l2)))
+    # (:duration (= ?duration (/ (travel-time ?l1 ?l2) 10)))
     def __init__(self, duration_node):
+        assert duration_node.name == ":duration"
+        assert len(duration_node.children) == 1
         eq_node = duration_node.children[0]
-        assert eq_node.name == "="
-        _, duration = eq_node.children
+        self.eq = eq_node.name
+        assert self.eq in ("=", ">=", "<=", ">", "<")
         assert eq_node.children[0].name == "?duration"
-        if duration.children:
-            duration = f"({duration.name} {' '.join([c.name for c in duration.children])})"
-        else:
-            duration = duration.name
-        self.duration = duration
+        assert len(eq_node.children) == 2
+        duration = eq_node.children[1]
+        self.duration = _flatten_tree(duration)
 
     def __repr__(self):
-        return f"(= ?duration {self.duration})"
+        return f"({self.eq} ?duration {self.duration})"
+
+def _flatten_tree(node):
+    if node.children:
+        args = " ".join(_flatten_tree(c) for c in node.children)
+        return f"({node.name} {args})"
+    return node.name
