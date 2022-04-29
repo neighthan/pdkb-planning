@@ -9,6 +9,7 @@ from pdkb.kd45 import PDKB, project
 from pdkb.actions import Action, CombinedDurativeAction, DurativeAction
 from pdkb.pddl.grounder import DurativeOperator, GroundProblem
 import pdkb
+from .pass_through import PASS_THROUGH
 
 
 def parse_ma_cond(dcond):
@@ -515,6 +516,14 @@ class Domain:
 
         to_ret =  f"(define (domain {self.name})\n\n"
         to_ret += "  (:requirements :strips :conditional-effects :durative-actions)\n\n"
+
+        if PASS_THROUGH.functions:
+            to_ret += "  (:functions\n"
+            for func_node in PASS_THROUGH.functions:
+                args = " ".join([c.name for c in func_node.children])
+                to_ret += f"    ({func_node.name} {args})\n"
+            to_ret += "  )\n\n"
+
         to_ret += "  (:predicates\n"
 
         PROPS = pdkb.all_rmls | akpdkb.all_rmls

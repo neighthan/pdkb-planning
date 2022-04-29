@@ -6,6 +6,7 @@ from .action import Action, DurativeAction
 from .predicate import Predicate
 from .pddl_tree import PDDL_Tree
 from .utils import PDDL_Utils
+from ..pass_through import PASS_THROUGH
 
 
 class ParseError(Exception):
@@ -277,12 +278,19 @@ class Problem(object):
                             "Error with time of predicate:\n"
                             f"{predicate.print_tree(print_=False)}"
                         )
-            dcond_idx = [n.name for n in child.children].index(":derive-condition")
-            if child.children[dcond_idx+1].name != "always":
-                raise ParseError("Durative actions must have :derive-condition always.")
+            try:
+                dcond_idx = [n.name for n in child.children].index(":derive-condition")
+                if child.children[dcond_idx+1].name != "always":
+                    raise ParseError("Durative actions must have :derive-condition always.")
+            except ValueError:
+                child.children.insert(1, PDDL_Tree(":derive-condition"))
+                child.children.insert(2, PDDL_Tree("always"))
 
         assert "domain" in parse_tree, "Domain must have a name"
         self.domain_name = parse_tree ["domain"].named_children ()[0]
+
+        if ":functions" in parse_tree:
+            PASS_THROUGH.functions = parse_tree[":functions"].children
 
         # must read types before constants
         if ":types" in parse_tree:
