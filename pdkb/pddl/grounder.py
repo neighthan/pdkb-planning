@@ -1,4 +1,7 @@
+from copy import deepcopy
+
 from .parser import Problem
+from ..pass_through import PASS_THROUGH
 from .action import Action, DurativeAction, _check_times_present
 from .formula import Primitive, Forall, When, And
 from .predicate import Predicate
@@ -342,7 +345,10 @@ class GroundProblem(Problem):
         op_effect = self._partial_ground_formula(action.effect, assignment, fluent_dict)
         op_dcond = self._partial_ground_formula(action.dcond, assignment, fluent_dict)
         if isinstance(action, DurativeAction):
-            return DurativeOperator(op_name, op_params, op_precond, op_observe, op_effect, op_dcond, action.duration)
+            duration = deepcopy(action.duration)
+            for name, val in assignment.items():
+                duration.duration = duration.duration.replace(f" {name}", f"_{val}")
+            return DurativeOperator(op_name, op_params, op_precond, op_observe, op_effect, op_dcond, duration)
         return Operator(op_name, op_params, op_precond, op_observe, op_effect, op_dcond)
 
     def _create_operators(self, fluent_dict):
@@ -366,6 +372,19 @@ class GroundProblem(Problem):
             for valuation in val_generator:
                 assignment = {var_name: val for var_name, val in zip(var_names, valuation)}
                 self.fluents.add(self._predicate_to_fluent(p, assignment))
+
+    def _create_numeric_fluents(self):
+        """Create the set of numeric fluents by grounding the functions."""
+        PASS_THROUGH.numeric_fluents = set()
+        for func in self.functions:
+            # like ['?l1', '-', 'location', '?l2', '-', 'location']
+            names = [c.name for c in func.children]
+            assert set(names[1::3]) == {"-"}
+            assert len(names) % 3 == 0
+            args = list(zip(names[::3], names[2::3]))
+            _, val_generator = self._create_valuations(args)
+            for valuation in val_generator:
+                PASS_THROUGH.numeric_fluents.add(f"{func.name}_{'_'.join(valuation)}")
 
     def _get_unground_vars(self, formula, d):
         """
@@ -407,6 +426,7 @@ class GroundProblem(Problem):
         """Convert this problem into a ground problem."""
 
         self._create_fluents()
+        self._create_numeric_fluents()
 
         # to avoid creating a bunch new fluent objects, create a dictionary mapping fluent names to their objects
         fluent_dict = {hash(f): f for f in self.fluents}

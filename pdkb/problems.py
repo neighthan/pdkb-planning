@@ -381,7 +381,13 @@ class ValidGeneration(Problem):
         for rml in sorted(self.init, key=lambda r: str(r)):
             to_ret += "    (%s)\n" % rml.pddl()
         if PASS_THROUGH.func_init:
-            to_ret += "    " + "\n    ".join(PASS_THROUGH.func_init) + "\n"
+            # form is (= (travel-time earth sb128) 1)
+            # convert to (= (travel-time_earth_sb128) 1)
+            for func_init in PASS_THROUGH.func_init:
+                eq, *func_args, val = func_init.split(" ")
+                func_args = "_".join(func_args)
+                func_init = " ".join([eq, func_args, val])
+                to_ret += f"    {func_init}\n"
         to_ret += "  )\n\n"
         to_ret += "  (:goal (and\n"
         for rml in sorted(self.goal, key=lambda r: str(r)):
@@ -528,11 +534,10 @@ class Domain:
         to_ret =  f"(define (domain {self.name})\n\n"
         to_ret += "  (:requirements :strips :conditional-effects :durative-actions)\n\n"
 
-        if PASS_THROUGH.functions:
+        if PASS_THROUGH.numeric_fluents:
             to_ret += "  (:functions\n"
-            for func_node in PASS_THROUGH.functions:
-                args = " ".join([c.name for c in func_node.children])
-                to_ret += f"    ({func_node.name} {args})\n"
+            for fluent in PASS_THROUGH.numeric_fluents:
+                to_ret += f"    ({fluent})\n"
             to_ret += "  )\n\n"
 
         to_ret += "  (:predicates\n"

@@ -290,7 +290,7 @@ class Problem(object):
         self.domain_name = parse_tree ["domain"].named_children ()[0]
 
         if ":functions" in parse_tree:
-            PASS_THROUGH.functions = parse_tree[":functions"].children
+            self.functions = parse_tree[":functions"].children
 
         # must read types before constants
         if ":types" in parse_tree:
