@@ -380,6 +380,8 @@ class ValidGeneration(Problem):
         to_ret += "  (:init\n"
         for rml in sorted(self.init, key=lambda r: str(r)):
             to_ret += "    (%s)\n" % rml.pddl()
+        if PASS_THROUGH.func_init:
+            to_ret += "    " + "\n    ".join(PASS_THROUGH.func_init) + "\n"
         to_ret += "  )\n\n"
         to_ret += "  (:goal (and\n"
         for rml in sorted(self.goal, key=lambda r: str(r)):

@@ -410,6 +410,9 @@ class Problem(object):
         """
 
         parse_tree = PDDL_Tree.create(f_problem)
+        inits = parse_tree[":init"].children
+        PASS_THROUGH.func_init = [node.to_pddl() for node in inits if node.name == "="]
+        parse_tree[":init"].children = [node for node in inits if node.name != "="]
 
         assert "problem" in parse_tree, "Problem must have a name"
         self.problem_name = parse_tree ["problem"].named_children ()[0]

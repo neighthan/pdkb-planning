@@ -98,6 +98,12 @@ class PDDL_Tree (object):
 
         return self.name == PDDL_Tree.EMPTY
 
+    def to_pddl(self):
+        if self.children:
+            args = " ".join(c.to_pddl() for c in self.children)
+            return f"({self.name} {args})"
+        return f"{self.name}"
+
     @staticmethod
     def create (fname):
         """Create a PDDL Tree out of the given PDDL file."""
