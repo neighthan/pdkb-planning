@@ -141,6 +141,9 @@ pdkb-plan.out
 pdkb-problem.pddl
 
 execution.details
+examples/temporal/*_domain.pddl
+examples/temporal/*_problem.pddl
+examples/temporal/plan.txt.*
 
 EVAL-OUTPUT
 EFP

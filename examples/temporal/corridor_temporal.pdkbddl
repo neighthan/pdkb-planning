@@ -1,0 +1,119 @@
+(define (domain corridor)
+  (:agents a b c)
+  (:types loc)
+  (:constants l1 l2 l3 l4 - loc)
+  (:predicates
+    (secret)
+    {AK}(at ?l - loc)
+    {AK}(succ ?l1 ?l2 - loc)
+  )
+
+  (:durative-action right
+    :derive-condition always
+    :duration (= ?duration 1)
+    :parameters (?l1 ?l2 - loc)
+    :condition (and
+      (at start (at ?l1))
+      (over all (succ ?l1 ?l2))
+    )
+    :effect (and
+      (at start (not (at ?l1)))
+      (at end (at ?l2))
+    )
+  )
+
+  (:durative-action left
+    :derive-condition always
+    :duration (= ?duration 1)
+    :parameters (?l1 ?l2 - loc)
+    :condition (and
+      (at start (at ?l2))
+      (over all (succ ?l1 ?l2))
+    )
+    :effect (and
+      (at start (not (at ?l2)))
+      (at end (at ?l1))
+    )
+  )
+
+  (:durative-action sense
+    :derive-condition always
+    :duration (= ?duration 1)
+    :condition (and
+      (over all (at l2))
+    )
+    :effect (and
+      (at end [a](secret))
+    )
+  )
+
+  (:durative-action shout-1
+    :derive-condition always
+    :duration (= ?duration 1)
+    :condition (and
+      (over all (at l1))
+      (over all [a](secret))
+    )
+    :effect (and
+      (at end [b](secret))
+    )
+  )
+
+  (:durative-action shout-2
+    :derive-condition always
+    :duration (= ?duration 1)
+    :condition (and
+      (over all (at l2))
+      (over all [a](secret))
+    )
+    :effect (and
+      (at end [b](secret))
+      (at end [c](secret))
+    )
+  )
+
+  (:durative-action shout-3
+    :derive-condition always
+    :duration (= ?duration 1)
+    :condition (and
+      (over all (at l3))
+      (over all [a](secret))
+    )
+    :effect (and
+      (at end [b](secret))
+      (at end [c](secret))
+    )
+  )
+
+  (:durative-action shout-4
+    :derive-condition always
+    :duration (= ?duration 1)
+    :condition (and
+      (over all (at l4))
+      (over all [a](secret))
+    )
+    :effect (and
+      (at end [c](secret))
+    )
+  )
+)
+
+
+(define (problem prob-depth1)
+
+  (:domain corridor)
+
+  (:projection )
+  (:depth 1)
+  (:task valid_generation)
+
+  (:init-type complete)
+  (:init
+    (at l1)
+    (succ l1 l2)
+    (succ l2 l3)
+    (succ l3 l4)
+  )
+
+  (:goal [c](secret) ![b](secret))
+)
