@@ -5,5 +5,6 @@ class PassThrough:
     def __init__(self):
         self.functions = None
         self.func_init = None
+        self.metric = None
 
 PASS_THROUGH = PassThrough()

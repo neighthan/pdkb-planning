@@ -387,6 +387,8 @@ class ValidGeneration(Problem):
         for rml in sorted(self.goal, key=lambda r: str(r)):
             to_ret += "    (%s)\n" % rml.pddl()
         to_ret += "  ))\n"
+        if PASS_THROUGH.metric:
+            to_ret += f"\n  {PASS_THROUGH.metric}\n"
         to_ret += ')'
 
         return to_ret
