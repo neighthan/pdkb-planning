@@ -341,6 +341,11 @@ class Problem(object):
                 # only need to do this once, obviously
                 break
 
+        self.child_types = {
+            parent: [c for c in self.parent_types if self.parent_types[c] == parent]
+            for parent in set(self.parent_types.values())
+        }
+
         all_actions = list(parse_tree.find_all(":action")) + list(parse_tree.find_all(":durative-action"))
         self.actions = [self.to_action(a) for a in all_actions]
 

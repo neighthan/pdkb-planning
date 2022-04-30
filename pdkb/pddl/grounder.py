@@ -195,16 +195,19 @@ class GroundProblem(Problem):
         d = {}
 
         for param_name, param_type in params:
-            if param_type in self.type_to_obj:
-                d[param_name] = self.type_to_obj[param_type]
-            elif Predicate.OBJECT == param_type:
-                d[param_name] = self.objects.copy()
-            else:
-                # for debugging
-                s = "Found a type in the list of parameters that is not in the type_to_obj dict \n"
-                s += "param_type = %s\n" % str(param_type)
-                s += "type_to_obj = %s" % str(self.type_to_obj)
-                raise KeyError(s)
+            vals = set()
+            for leaf_type in self._get_leaf_types(param_type):
+                if leaf_type in self.type_to_obj:
+                    vals |= self.type_to_obj[leaf_type]
+                elif Predicate.OBJECT == leaf_type:
+                    vals |= self.objects
+                else:
+                    # for debugging
+                    s = "Found a type in the list of parameters that is not in the type_to_obj dict \n"
+                    s += "param_type = %s\n" % str(leaf_type)
+                    s += "type_to_obj = %s" % str(self.type_to_obj)
+                    raise KeyError(s)
+            d[param_name] = vals
 
         return d
 
@@ -440,6 +443,11 @@ class GroundProblem(Problem):
             else:
                 print("\t" + str(v))
 
+    def _get_leaf_types(self, type_):
+        if type_ in self.child_types:
+            return [t for c in self.child_types[type_] for t in self._get_leaf_types(c)]
+        else:
+            return [type_]
 
 class Operator(Action):
     """
