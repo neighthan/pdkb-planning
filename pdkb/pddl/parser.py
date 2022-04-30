@@ -415,7 +415,15 @@ class Problem(object):
         PASS_THROUGH.func_init = [node.to_pddl() for node in inits if node.name == "="]
         parse_tree[":init"].children = [node for node in inits if node.name != "="]
         if ":metric" in parse_tree:
-            PASS_THROUGH.metric = parse_tree[":metric"].to_pddl()
+            # convert from, e.g., (:metric minimize total-time)
+            # to (:metric minimize (total-time))
+            metric = parse_tree[":metric"].to_pddl()
+            metric, max_min, *args = metric.split(" ")
+            if args[0][0] != "(":
+                args = f"({' '.join(args)})"
+            else:
+                args = " ".join(args)
+            PASS_THROUGH.metric = " ".join([metric, max_min, args])
 
         assert "problem" in parse_tree, "Problem must have a name"
         self.problem_name = parse_tree ["problem"].named_children ()[0]

@@ -534,12 +534,6 @@ class Domain:
         to_ret =  f"(define (domain {self.name})\n\n"
         to_ret += "  (:requirements :strips :conditional-effects :durative-actions)\n\n"
 
-        if PASS_THROUGH.numeric_fluents:
-            to_ret += "  (:functions\n"
-            for fluent in PASS_THROUGH.numeric_fluents:
-                to_ret += f"    ({fluent})\n"
-            to_ret += "  )\n\n"
-
         to_ret += "  (:predicates\n"
 
         PROPS = pdkb.all_rmls | akpdkb.all_rmls
@@ -556,6 +550,12 @@ class Domain:
             to_ret += f"    ({rml.pddl()})\n"
 
         to_ret += "  )\n\n"
+
+        if PASS_THROUGH.numeric_fluents:
+            to_ret += "  (:functions\n"
+            for fluent in PASS_THROUGH.numeric_fluents:
+                to_ret += f"    ({fluent})\n"
+            to_ret += "  )\n\n"
 
         actions = combine_actions(self.actions)
         for act in sorted(actions, key=lambda a: a.name):
