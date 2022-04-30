@@ -13,7 +13,7 @@ setup(name = 'PDKB Planning Library',
     install_requires=["auto-argparse"],
     entry_points={
         'console_scripts': [
-            "convert_pdkbdll = pdkb.scripts:convert_pdkbdll",
+            "convert_pdkbddl = pdkb.scripts:convert_pdkbddl",
         ],
     }
 )

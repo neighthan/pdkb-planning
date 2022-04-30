@@ -14,8 +14,8 @@ def cleanup():
     os.system('rm -f execution.details')
 
 
-def convert_to_pddl(pdkbdll: str):
-    problem = parse_pdkbddl(pdkbdll, input_is_file=False)
+def convert_to_pddl(pdkbddl: str):
+    problem = parse_pdkbddl(pdkbddl, input_is_file=False)
     problem.preprocess()
     return {"domain": problem.domain.pddl(), "problem": problem.pddl()}
 
