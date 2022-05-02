@@ -40,6 +40,8 @@ In order to easily add epistemic aspects to existing problems, we've added defau
 * `(:projection )` (no projection)
 
 ## Caveats
+* TFD doesn't support duration inequalities.
+* TFD may have issues with action durations involving operations applied to functions
 * Problem types besides valid generation may not work.
 * Because of how the parsing works, using [] for belief or <> for possibility on the same line where these characters are used in another way may cause issues. See `pdkb.problems:read_pdkbddl_file`, especially `replace_modal`.
 

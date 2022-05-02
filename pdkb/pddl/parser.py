@@ -289,6 +289,9 @@ class Problem(object):
         assert "domain" in parse_tree, "Domain must have a name"
         self.domain_name = parse_tree ["domain"].named_children ()[0]
 
+        if ":requirements" in parse_tree:
+            PASS_THROUGH.requirements = [n.name for n in parse_tree[":requirements"].children]
+
         if ":functions" in parse_tree:
             self.functions = parse_tree[":functions"].children
 

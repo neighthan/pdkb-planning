@@ -532,7 +532,10 @@ class Domain:
         akpdkb = PDKB(0, [], self.akprops)
 
         to_ret =  f"(define (domain {self.name})\n\n"
-        to_ret += "  (:requirements :strips :conditional-effects :durative-actions)\n\n"
+        reqs = set([":strips", ":conditional-effects"])
+        if PASS_THROUGH.requirements:
+            reqs.update(PASS_THROUGH.requirements)
+        to_ret += f"  (:requirements {' '.join(reqs)})\n\n"
 
         to_ret += "  (:predicates\n"
 
