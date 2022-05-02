@@ -294,6 +294,8 @@ class Problem(object):
 
         if ":functions" in parse_tree:
             self.functions = parse_tree[":functions"].children
+        else:
+            self.functions = []
 
         # must read types before constants
         if ":types" in parse_tree:
