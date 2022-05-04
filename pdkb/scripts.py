@@ -2,7 +2,7 @@ from pathlib import Path
 
 from auto_argparse import parse_args_and_run_dec
 
-from .planner import convert_to_pddl
+from pdkb.planner import convert_to_pddl
 
 @parse_args_and_run_dec
 def convert_pdkbddl(pdkbddl_path: str):
