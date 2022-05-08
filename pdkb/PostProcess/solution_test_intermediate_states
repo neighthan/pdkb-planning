@@ -1,0 +1,11 @@
+time:0.00 Propositions: at_l1 ,Pb !secret ,Pc !secret ,Pa secret ,succ_l2_l3 ,succ_l1_l2 ,succ_l3_l4 ,Pb secret ,Pa !secret ,Pc secret
+time:0.001 Propositions: at_l1, Pb !secret, Pc !secret, !at_l1, Pa secret, succ_l2_l3, succ_l1_l2, succ_l3_l4, Pb secret, Pa !secret, Pc secret
+time:1.001 Propositions: at_l1, Pb !secret, Pc !secret, !at_l1, Pa secret, at_l2, succ_l2_l3, succ_l1_l2, succ_l3_l4, Pb secret, Pa !secret, Pc secret
+time:1.011 Propositions: at_l1, Pb !secret, Pc !secret, !at_l1, Pa secret, at_l2, succ_l2_l3, succ_l1_l2, succ_l3_l4, Pb secret, Pa !secret, Pc secret
+time:2.011 Propositions: at_l1, Pb !secret, Pc !secret, !at_l1, Pa secret, at_l2, succ_l2_l3, Ba secret, succ_l1_l2, succ_l3_l4, Pb secret, Pa !secret, Pc secret
+time:2.021 Propositions: at_l1, Pb !secret, Pc !secret, !at_l1, Pa secret, at_l2, succ_l2_l3, Ba secret, !at_l2, succ_l1_l2, succ_l3_l4, Pb secret, Pa !secret, Pc secret
+time:3.021 Propositions: at_l1, Pb !secret, Pc !secret, !at_l1, Pa secret, at_l2, succ_l2_l3, at_l3, Ba secret, !at_l2, succ_l1_l2, succ_l3_l4, Pb secret, Pa !secret, Pc secret
+time:3.031 Propositions: at_l1, Pb !secret, Pc !secret, !at_l1, Pa secret, at_l2, succ_l2_l3, at_l3, !at_l3, Ba secret, !at_l2, succ_l1_l2, succ_l3_l4, Pb secret, Pa !secret, Pc secret
+time:4.031000000000001 Propositions: at_l1, Pb !secret, Pc !secret, !at_l1, Pa secret, at_l2, succ_l2_l3, at_l3, !at_l3, Ba secret, !at_l2, succ_l1_l2, succ_l3_l4, Pb secret, Pa !secret, Pc secret, at_l4
+time:4.041 Propositions: at_l1, Pb !secret, Pc !secret, !at_l1, Pa secret, at_l2, succ_l2_l3, at_l3, !at_l3, Ba secret, !at_l2, succ_l1_l2, succ_l3_l4, Pb secret, Pa !secret, Pc secret, at_l4
+time:5.041 Propositions: at_l1, Pb !secret, Pc !secret, !at_l1, Pa secret, at_l2, succ_l2_l3, at_l3, !at_l3, Ba secret, !at_l2, succ_l1_l2, succ_l3_l4, Pb secret, Bc secret, Pa !secret, Pc secret, at_l4
