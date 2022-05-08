@@ -1,0 +1,101 @@
+(define (domain corridor)
+  (:agents a b c)
+  (:types loc)
+  (:constants l1 l2 l3 l4 - loc)
+  (:predicates
+    (secret)
+    {AK}(at ?ag - agent ?l - loc)
+    {AK}(succ ?l1 ?l2 - loc)
+  )
+
+  (:durative-action right
+    :derive-condition always
+    :duration (= ?duration 1)
+    :parameters (?l1 ?l2 - loc)
+    :condition (and
+      (at start (at a ?l1))
+      (at start (succ ?l1 ?l2))
+      (over all (succ ?l1 ?l2))
+      (at end (succ ?l1 ?l2))
+    )
+    :effect (and
+      (at start (not (at a ?l1)))
+      (at end (at a ?l2))
+    )
+  )
+
+  (:durative-action left
+    :derive-condition always
+    :duration (= ?duration 1)
+    :parameters (?l1 ?l2 - loc)
+    :condition (and
+      (at start (at a ?l2))
+      (at start (succ ?l1 ?l2))
+      (over all (succ ?l1 ?l2))
+      (at end (succ ?l1 ?l2))
+    )
+    :effect (and
+      (at start (not (at a ?l2)))
+      (at end (at a ?l1))
+    )
+  )
+
+  (:durative-action sense
+    :derive-condition always
+    :duration (= ?duration 1)
+    :condition (and
+      (at start (at a l2))
+      (over all (at a l2))
+      (at end (at a l2))
+    )
+    :effect (and
+      (at end [a](secret))
+    )
+  )
+
+  (:durative-action shout
+    :derive-condition always
+    :duration (= ?duration 1)
+    :parameters (?l - loc)
+    :condition (and
+      (at start (at a ?l))
+      (over all (at a ?l))
+      (at end (at a ?l))
+      (at start [a](secret))
+      (over all [a](secret))
+      (at end [a](secret))
+    )
+    :effect (and
+      (at end
+        (forall ?ag - agent (and
+          (when
+            (and (at ?ag ?l))
+            [?ag](secret)
+          )
+        ))
+      )
+    )
+  )
+)
+
+
+(define (problem prob-depth1)
+
+  (:domain corridor)
+
+  (:projection )
+  (:depth 1)
+  (:task valid_generation)
+
+  (:init-type complete)
+  (:init
+    (at a l1)
+    (at b l3)
+    (at c l4)
+    (succ l1 l2)
+    (succ l2 l3)
+    (succ l3 l4)
+  )
+
+  (:goal [b](secret) [c](secret))
+)
