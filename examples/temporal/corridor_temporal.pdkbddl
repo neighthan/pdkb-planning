@@ -4,6 +4,7 @@
   (:constants l1 l2 l3 l4 - loc)
   (:predicates
     (secret)
+    {AK}(exists ?a - agent)
     {AK}(at ?l - loc)
     {AK}(succ ?l1 ?l2 - loc)
   )
@@ -86,7 +87,7 @@
   )
 
   (:durative-action shout-4
-    :derive-condition always
+    :derive-condition (at start (exists $agent$))
     :duration (= ?duration 1)
     :condition (and
       (over all (at l4))
@@ -113,6 +114,9 @@
     (succ l1 l2)
     (succ l2 l3)
     (succ l3 l4)
+    (exists a)
+    (exists b)
+    (exists c)
   )
 
   (:goal [c](secret) ![b](secret))

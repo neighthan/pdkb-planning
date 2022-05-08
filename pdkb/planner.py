@@ -1,7 +1,6 @@
 
 from .actions import *
 from .problems import *
-#from pdkb.PostProcess.process_plan import *
 
 def cleanup():
     os.system('rm -f pdkb-domain.pddl')

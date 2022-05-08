@@ -1,12 +1,15 @@
 (define (domain corridor)
 
-  (:requirements :strips :conditional-effects)
+  (:requirements :conditional-effects :strips)
 
   (:predicates
     (not_at_l1)
     (not_at_l2)
     (not_at_l3)
     (not_at_l4)
+    (not_exists_a)
+    (not_exists_b)
+    (not_exists_c)
     (not_secret)
     (not_succ_l1_l1)
     (not_succ_l1_l2)
@@ -40,6 +43,9 @@
     (at_l2)
     (at_l3)
     (at_l4)
+    (exists_a)
+    (exists_b)
+    (exists_c)
     (secret)
     (succ_l1_l1)
     (succ_l1_l2)
@@ -68,10 +74,10 @@
     )
 
     :effect (and
-      (at start (not_at_l1))  ; #73953: <==commonly_known== 59510 (neg)
-      (at start (not (at_l1)))  ; #59510: origin
-      (at end (at_l1))  ; #59510: origin
-      (at end (not (not_at_l1)))  ; #73953: <==negation-removal== 59510 (pos)
+      (at start (not_at_l1))  ; #11856: <==commonly_known== 53422 (neg)
+      (at start (not (at_l1)))  ; #53422: origin
+      (at end (at_l1))  ; #53422: origin
+      (at end (not (not_at_l1)))  ; #11856: <==negation-removal== 53422 (pos)
     )
   )
 
@@ -84,10 +90,10 @@
     )
 
     :effect (and
-      (at start (not_at_l2))  ; #35151: <==commonly_known== 80773 (neg)
-      (at start (not (at_l2)))  ; #80773: origin
-      (at end (at_l1))  ; #59510: origin
-      (at end (not (not_at_l1)))  ; #73953: <==negation-removal== 59510 (pos)
+      (at start (not_at_l2))  ; #42548: <==commonly_known== 92041 (neg)
+      (at start (not (at_l2)))  ; #92041: origin
+      (at end (at_l1))  ; #53422: origin
+      (at end (not (not_at_l1)))  ; #11856: <==negation-removal== 53422 (pos)
     )
   )
 
@@ -100,10 +106,10 @@
     )
 
     :effect (and
-      (at start (not_at_l3))  ; #34431: <==commonly_known== 50170 (neg)
-      (at start (not (at_l3)))  ; #50170: origin
-      (at end (at_l1))  ; #59510: origin
-      (at end (not (not_at_l1)))  ; #73953: <==negation-removal== 59510 (pos)
+      (at start (not_at_l3))  ; #25325: <==commonly_known== 35450 (neg)
+      (at start (not (at_l3)))  ; #35450: origin
+      (at end (at_l1))  ; #53422: origin
+      (at end (not (not_at_l1)))  ; #11856: <==negation-removal== 53422 (pos)
     )
   )
 
@@ -116,10 +122,10 @@
     )
 
     :effect (and
-      (at start (not_at_l4))  ; #29801: <==commonly_known== 29558 (neg)
-      (at start (not (at_l4)))  ; #29558: origin
-      (at end (at_l1))  ; #59510: origin
-      (at end (not (not_at_l1)))  ; #73953: <==negation-removal== 59510 (pos)
+      (at start (not_at_l4))  ; #99830: <==commonly_known== 18377 (neg)
+      (at start (not (at_l4)))  ; #18377: origin
+      (at end (at_l1))  ; #53422: origin
+      (at end (not (not_at_l1)))  ; #11856: <==negation-removal== 53422 (pos)
     )
   )
 
@@ -132,10 +138,10 @@
     )
 
     :effect (and
-      (at start (not_at_l1))  ; #73953: <==commonly_known== 59510 (neg)
-      (at start (not (at_l1)))  ; #59510: origin
-      (at end (at_l2))  ; #80773: origin
-      (at end (not (not_at_l2)))  ; #35151: <==negation-removal== 80773 (pos)
+      (at start (not_at_l1))  ; #11856: <==commonly_known== 53422 (neg)
+      (at start (not (at_l1)))  ; #53422: origin
+      (at end (at_l2))  ; #92041: origin
+      (at end (not (not_at_l2)))  ; #42548: <==negation-removal== 92041 (pos)
     )
   )
 
@@ -148,10 +154,10 @@
     )
 
     :effect (and
-      (at start (not_at_l2))  ; #35151: <==commonly_known== 80773 (neg)
-      (at start (not (at_l2)))  ; #80773: origin
-      (at end (at_l2))  ; #80773: origin
-      (at end (not (not_at_l2)))  ; #35151: <==negation-removal== 80773 (pos)
+      (at start (not_at_l2))  ; #42548: <==commonly_known== 92041 (neg)
+      (at start (not (at_l2)))  ; #92041: origin
+      (at end (at_l2))  ; #92041: origin
+      (at end (not (not_at_l2)))  ; #42548: <==negation-removal== 92041 (pos)
     )
   )
 
@@ -164,10 +170,10 @@
     )
 
     :effect (and
-      (at start (not_at_l3))  ; #34431: <==commonly_known== 50170 (neg)
-      (at start (not (at_l3)))  ; #50170: origin
-      (at end (at_l2))  ; #80773: origin
-      (at end (not (not_at_l2)))  ; #35151: <==negation-removal== 80773 (pos)
+      (at start (not_at_l3))  ; #25325: <==commonly_known== 35450 (neg)
+      (at start (not (at_l3)))  ; #35450: origin
+      (at end (at_l2))  ; #92041: origin
+      (at end (not (not_at_l2)))  ; #42548: <==negation-removal== 92041 (pos)
     )
   )
 
@@ -180,10 +186,10 @@
     )
 
     :effect (and
-      (at start (not_at_l4))  ; #29801: <==commonly_known== 29558 (neg)
-      (at start (not (at_l4)))  ; #29558: origin
-      (at end (at_l2))  ; #80773: origin
-      (at end (not (not_at_l2)))  ; #35151: <==negation-removal== 80773 (pos)
+      (at start (not_at_l4))  ; #99830: <==commonly_known== 18377 (neg)
+      (at start (not (at_l4)))  ; #18377: origin
+      (at end (at_l2))  ; #92041: origin
+      (at end (not (not_at_l2)))  ; #42548: <==negation-removal== 92041 (pos)
     )
   )
 
@@ -196,10 +202,10 @@
     )
 
     :effect (and
-      (at start (not_at_l1))  ; #73953: <==commonly_known== 59510 (neg)
-      (at start (not (at_l1)))  ; #59510: origin
-      (at end (at_l3))  ; #50170: origin
-      (at end (not (not_at_l3)))  ; #34431: <==negation-removal== 50170 (pos)
+      (at start (not_at_l1))  ; #11856: <==commonly_known== 53422 (neg)
+      (at start (not (at_l1)))  ; #53422: origin
+      (at end (at_l3))  ; #35450: origin
+      (at end (not (not_at_l3)))  ; #25325: <==negation-removal== 35450 (pos)
     )
   )
 
@@ -212,10 +218,10 @@
     )
 
     :effect (and
-      (at start (not_at_l2))  ; #35151: <==commonly_known== 80773 (neg)
-      (at start (not (at_l2)))  ; #80773: origin
-      (at end (at_l3))  ; #50170: origin
-      (at end (not (not_at_l3)))  ; #34431: <==negation-removal== 50170 (pos)
+      (at start (not_at_l2))  ; #42548: <==commonly_known== 92041 (neg)
+      (at start (not (at_l2)))  ; #92041: origin
+      (at end (at_l3))  ; #35450: origin
+      (at end (not (not_at_l3)))  ; #25325: <==negation-removal== 35450 (pos)
     )
   )
 
@@ -228,10 +234,10 @@
     )
 
     :effect (and
-      (at start (not_at_l3))  ; #34431: <==commonly_known== 50170 (neg)
-      (at start (not (at_l3)))  ; #50170: origin
-      (at end (at_l3))  ; #50170: origin
-      (at end (not (not_at_l3)))  ; #34431: <==negation-removal== 50170 (pos)
+      (at start (not_at_l3))  ; #25325: <==commonly_known== 35450 (neg)
+      (at start (not (at_l3)))  ; #35450: origin
+      (at end (at_l3))  ; #35450: origin
+      (at end (not (not_at_l3)))  ; #25325: <==negation-removal== 35450 (pos)
     )
   )
 
@@ -244,10 +250,10 @@
     )
 
     :effect (and
-      (at start (not_at_l4))  ; #29801: <==commonly_known== 29558 (neg)
-      (at start (not (at_l4)))  ; #29558: origin
-      (at end (at_l3))  ; #50170: origin
-      (at end (not (not_at_l3)))  ; #34431: <==negation-removal== 50170 (pos)
+      (at start (not_at_l4))  ; #99830: <==commonly_known== 18377 (neg)
+      (at start (not (at_l4)))  ; #18377: origin
+      (at end (at_l3))  ; #35450: origin
+      (at end (not (not_at_l3)))  ; #25325: <==negation-removal== 35450 (pos)
     )
   )
 
@@ -260,10 +266,10 @@
     )
 
     :effect (and
-      (at start (not_at_l1))  ; #73953: <==commonly_known== 59510 (neg)
-      (at start (not (at_l1)))  ; #59510: origin
-      (at end (at_l4))  ; #29558: origin
-      (at end (not (not_at_l4)))  ; #29801: <==negation-removal== 29558 (pos)
+      (at start (not_at_l1))  ; #11856: <==commonly_known== 53422 (neg)
+      (at start (not (at_l1)))  ; #53422: origin
+      (at end (at_l4))  ; #18377: origin
+      (at end (not (not_at_l4)))  ; #99830: <==negation-removal== 18377 (pos)
     )
   )
 
@@ -276,10 +282,10 @@
     )
 
     :effect (and
-      (at start (not_at_l2))  ; #35151: <==commonly_known== 80773 (neg)
-      (at start (not (at_l2)))  ; #80773: origin
-      (at end (at_l4))  ; #29558: origin
-      (at end (not (not_at_l4)))  ; #29801: <==negation-removal== 29558 (pos)
+      (at start (not_at_l2))  ; #42548: <==commonly_known== 92041 (neg)
+      (at start (not (at_l2)))  ; #92041: origin
+      (at end (at_l4))  ; #18377: origin
+      (at end (not (not_at_l4)))  ; #99830: <==negation-removal== 18377 (pos)
     )
   )
 
@@ -292,10 +298,10 @@
     )
 
     :effect (and
-      (at start (not_at_l3))  ; #34431: <==commonly_known== 50170 (neg)
-      (at start (not (at_l3)))  ; #50170: origin
-      (at end (at_l4))  ; #29558: origin
-      (at end (not (not_at_l4)))  ; #29801: <==negation-removal== 29558 (pos)
+      (at start (not_at_l3))  ; #25325: <==commonly_known== 35450 (neg)
+      (at start (not (at_l3)))  ; #35450: origin
+      (at end (at_l4))  ; #18377: origin
+      (at end (not (not_at_l4)))  ; #99830: <==negation-removal== 18377 (pos)
     )
   )
 
@@ -308,10 +314,10 @@
     )
 
     :effect (and
-      (at start (not_at_l4))  ; #29801: <==commonly_known== 29558 (neg)
-      (at start (not (at_l4)))  ; #29558: origin
-      (at end (at_l4))  ; #29558: origin
-      (at end (not (not_at_l4)))  ; #29801: <==negation-removal== 29558 (pos)
+      (at start (not_at_l4))  ; #99830: <==commonly_known== 18377 (neg)
+      (at start (not (at_l4)))  ; #18377: origin
+      (at end (at_l4))  ; #18377: origin
+      (at end (not (not_at_l4)))  ; #99830: <==negation-removal== 18377 (pos)
     )
   )
 
@@ -324,10 +330,10 @@
     )
 
     :effect (and
-      (at start (not_at_l1))  ; #73953: <==commonly_known== 59510 (neg)
-      (at start (not (at_l1)))  ; #59510: origin
-      (at end (at_l1))  ; #59510: origin
-      (at end (not (not_at_l1)))  ; #73953: <==negation-removal== 59510 (pos)
+      (at start (not_at_l1))  ; #11856: <==commonly_known== 53422 (neg)
+      (at start (not (at_l1)))  ; #53422: origin
+      (at end (at_l1))  ; #53422: origin
+      (at end (not (not_at_l1)))  ; #11856: <==negation-removal== 53422 (pos)
     )
   )
 
@@ -340,10 +346,10 @@
     )
 
     :effect (and
-      (at start (not_at_l1))  ; #73953: <==commonly_known== 59510 (neg)
-      (at start (not (at_l1)))  ; #59510: origin
-      (at end (at_l2))  ; #80773: origin
-      (at end (not (not_at_l2)))  ; #35151: <==negation-removal== 80773 (pos)
+      (at start (not_at_l1))  ; #11856: <==commonly_known== 53422 (neg)
+      (at start (not (at_l1)))  ; #53422: origin
+      (at end (at_l2))  ; #92041: origin
+      (at end (not (not_at_l2)))  ; #42548: <==negation-removal== 92041 (pos)
     )
   )
 
@@ -356,10 +362,10 @@
     )
 
     :effect (and
-      (at start (not_at_l1))  ; #73953: <==commonly_known== 59510 (neg)
-      (at start (not (at_l1)))  ; #59510: origin
-      (at end (at_l3))  ; #50170: origin
-      (at end (not (not_at_l3)))  ; #34431: <==negation-removal== 50170 (pos)
+      (at start (not_at_l1))  ; #11856: <==commonly_known== 53422 (neg)
+      (at start (not (at_l1)))  ; #53422: origin
+      (at end (at_l3))  ; #35450: origin
+      (at end (not (not_at_l3)))  ; #25325: <==negation-removal== 35450 (pos)
     )
   )
 
@@ -372,10 +378,10 @@
     )
 
     :effect (and
-      (at start (not_at_l1))  ; #73953: <==commonly_known== 59510 (neg)
-      (at start (not (at_l1)))  ; #59510: origin
-      (at end (at_l4))  ; #29558: origin
-      (at end (not (not_at_l4)))  ; #29801: <==negation-removal== 29558 (pos)
+      (at start (not_at_l1))  ; #11856: <==commonly_known== 53422 (neg)
+      (at start (not (at_l1)))  ; #53422: origin
+      (at end (at_l4))  ; #18377: origin
+      (at end (not (not_at_l4)))  ; #99830: <==negation-removal== 18377 (pos)
     )
   )
 
@@ -388,10 +394,10 @@
     )
 
     :effect (and
-      (at start (not_at_l2))  ; #35151: <==commonly_known== 80773 (neg)
-      (at start (not (at_l2)))  ; #80773: origin
-      (at end (at_l1))  ; #59510: origin
-      (at end (not (not_at_l1)))  ; #73953: <==negation-removal== 59510 (pos)
+      (at start (not_at_l2))  ; #42548: <==commonly_known== 92041 (neg)
+      (at start (not (at_l2)))  ; #92041: origin
+      (at end (at_l1))  ; #53422: origin
+      (at end (not (not_at_l1)))  ; #11856: <==negation-removal== 53422 (pos)
     )
   )
 
@@ -404,10 +410,10 @@
     )
 
     :effect (and
-      (at start (not_at_l2))  ; #35151: <==commonly_known== 80773 (neg)
-      (at start (not (at_l2)))  ; #80773: origin
-      (at end (at_l2))  ; #80773: origin
-      (at end (not (not_at_l2)))  ; #35151: <==negation-removal== 80773 (pos)
+      (at start (not_at_l2))  ; #42548: <==commonly_known== 92041 (neg)
+      (at start (not (at_l2)))  ; #92041: origin
+      (at end (at_l2))  ; #92041: origin
+      (at end (not (not_at_l2)))  ; #42548: <==negation-removal== 92041 (pos)
     )
   )
 
@@ -420,10 +426,10 @@
     )
 
     :effect (and
-      (at start (not_at_l2))  ; #35151: <==commonly_known== 80773 (neg)
-      (at start (not (at_l2)))  ; #80773: origin
-      (at end (at_l3))  ; #50170: origin
-      (at end (not (not_at_l3)))  ; #34431: <==negation-removal== 50170 (pos)
+      (at start (not_at_l2))  ; #42548: <==commonly_known== 92041 (neg)
+      (at start (not (at_l2)))  ; #92041: origin
+      (at end (at_l3))  ; #35450: origin
+      (at end (not (not_at_l3)))  ; #25325: <==negation-removal== 35450 (pos)
     )
   )
 
@@ -436,10 +442,10 @@
     )
 
     :effect (and
-      (at start (not_at_l2))  ; #35151: <==commonly_known== 80773 (neg)
-      (at start (not (at_l2)))  ; #80773: origin
-      (at end (at_l4))  ; #29558: origin
-      (at end (not (not_at_l4)))  ; #29801: <==negation-removal== 29558 (pos)
+      (at start (not_at_l2))  ; #42548: <==commonly_known== 92041 (neg)
+      (at start (not (at_l2)))  ; #92041: origin
+      (at end (at_l4))  ; #18377: origin
+      (at end (not (not_at_l4)))  ; #99830: <==negation-removal== 18377 (pos)
     )
   )
 
@@ -452,10 +458,10 @@
     )
 
     :effect (and
-      (at start (not_at_l3))  ; #34431: <==commonly_known== 50170 (neg)
-      (at start (not (at_l3)))  ; #50170: origin
-      (at end (at_l1))  ; #59510: origin
-      (at end (not (not_at_l1)))  ; #73953: <==negation-removal== 59510 (pos)
+      (at start (not_at_l3))  ; #25325: <==commonly_known== 35450 (neg)
+      (at start (not (at_l3)))  ; #35450: origin
+      (at end (at_l1))  ; #53422: origin
+      (at end (not (not_at_l1)))  ; #11856: <==negation-removal== 53422 (pos)
     )
   )
 
@@ -468,10 +474,10 @@
     )
 
     :effect (and
-      (at start (not_at_l3))  ; #34431: <==commonly_known== 50170 (neg)
-      (at start (not (at_l3)))  ; #50170: origin
-      (at end (at_l2))  ; #80773: origin
-      (at end (not (not_at_l2)))  ; #35151: <==negation-removal== 80773 (pos)
+      (at start (not_at_l3))  ; #25325: <==commonly_known== 35450 (neg)
+      (at start (not (at_l3)))  ; #35450: origin
+      (at end (at_l2))  ; #92041: origin
+      (at end (not (not_at_l2)))  ; #42548: <==negation-removal== 92041 (pos)
     )
   )
 
@@ -484,10 +490,10 @@
     )
 
     :effect (and
-      (at start (not_at_l3))  ; #34431: <==commonly_known== 50170 (neg)
-      (at start (not (at_l3)))  ; #50170: origin
-      (at end (at_l3))  ; #50170: origin
-      (at end (not (not_at_l3)))  ; #34431: <==negation-removal== 50170 (pos)
+      (at start (not_at_l3))  ; #25325: <==commonly_known== 35450 (neg)
+      (at start (not (at_l3)))  ; #35450: origin
+      (at end (at_l3))  ; #35450: origin
+      (at end (not (not_at_l3)))  ; #25325: <==negation-removal== 35450 (pos)
     )
   )
 
@@ -500,10 +506,10 @@
     )
 
     :effect (and
-      (at start (not_at_l3))  ; #34431: <==commonly_known== 50170 (neg)
-      (at start (not (at_l3)))  ; #50170: origin
-      (at end (at_l4))  ; #29558: origin
-      (at end (not (not_at_l4)))  ; #29801: <==negation-removal== 29558 (pos)
+      (at start (not_at_l3))  ; #25325: <==commonly_known== 35450 (neg)
+      (at start (not (at_l3)))  ; #35450: origin
+      (at end (at_l4))  ; #18377: origin
+      (at end (not (not_at_l4)))  ; #99830: <==negation-removal== 18377 (pos)
     )
   )
 
@@ -516,10 +522,10 @@
     )
 
     :effect (and
-      (at start (not_at_l4))  ; #29801: <==commonly_known== 29558 (neg)
-      (at start (not (at_l4)))  ; #29558: origin
-      (at end (at_l1))  ; #59510: origin
-      (at end (not (not_at_l1)))  ; #73953: <==negation-removal== 59510 (pos)
+      (at start (not_at_l4))  ; #99830: <==commonly_known== 18377 (neg)
+      (at start (not (at_l4)))  ; #18377: origin
+      (at end (at_l1))  ; #53422: origin
+      (at end (not (not_at_l1)))  ; #11856: <==negation-removal== 53422 (pos)
     )
   )
 
@@ -532,10 +538,10 @@
     )
 
     :effect (and
-      (at start (not_at_l4))  ; #29801: <==commonly_known== 29558 (neg)
-      (at start (not (at_l4)))  ; #29558: origin
-      (at end (at_l2))  ; #80773: origin
-      (at end (not (not_at_l2)))  ; #35151: <==negation-removal== 80773 (pos)
+      (at start (not_at_l4))  ; #99830: <==commonly_known== 18377 (neg)
+      (at start (not (at_l4)))  ; #18377: origin
+      (at end (at_l2))  ; #92041: origin
+      (at end (not (not_at_l2)))  ; #42548: <==negation-removal== 92041 (pos)
     )
   )
 
@@ -548,10 +554,10 @@
     )
 
     :effect (and
-      (at start (not_at_l4))  ; #29801: <==commonly_known== 29558 (neg)
-      (at start (not (at_l4)))  ; #29558: origin
-      (at end (at_l3))  ; #50170: origin
-      (at end (not (not_at_l3)))  ; #34431: <==negation-removal== 50170 (pos)
+      (at start (not_at_l4))  ; #99830: <==commonly_known== 18377 (neg)
+      (at start (not (at_l4)))  ; #18377: origin
+      (at end (at_l3))  ; #35450: origin
+      (at end (not (not_at_l3)))  ; #25325: <==negation-removal== 35450 (pos)
     )
   )
 
@@ -564,10 +570,10 @@
     )
 
     :effect (and
-      (at start (not_at_l4))  ; #29801: <==commonly_known== 29558 (neg)
-      (at start (not (at_l4)))  ; #29558: origin
-      (at end (at_l4))  ; #29558: origin
-      (at end (not (not_at_l4)))  ; #29801: <==negation-removal== 29558 (pos)
+      (at start (not_at_l4))  ; #99830: <==commonly_known== 18377 (neg)
+      (at start (not (at_l4)))  ; #18377: origin
+      (at end (at_l4))  ; #18377: origin
+      (at end (not (not_at_l4)))  ; #99830: <==negation-removal== 18377 (pos)
     )
   )
 
@@ -579,10 +585,10 @@
     )
 
     :effect (and
-      (at end (Ba_secret))  ; #59711: origin
-      (at end (Pa_secret))  ; #77167: <==closure== 59711 (pos)
-      (at end (not (Pa_not_secret)))  ; #19188: <==negation-removal== 59711 (pos)
-      (at end (not (Ba_not_secret)))  ; #59385: <==negation-removal== 77167 (pos)
+      (at end (Pa_secret))  ; #72444: <==closure== 87728 (pos)
+      (at end (Ba_secret))  ; #87728: origin
+      (at end (not (Pa_not_secret)))  ; #21453: <==negation-removal== 87728 (pos)
+      (at end (not (Ba_not_secret)))  ; #65331: <==negation-removal== 72444 (pos)
     )
   )
 
@@ -596,10 +602,10 @@
     )
 
     :effect (and
-      (at end (Pb_secret))  ; #14627: <==closure== 50394 (pos)
-      (at end (Bb_secret))  ; #50394: origin
-      (at end (not (Pb_not_secret)))  ; #43912: <==negation-removal== 50394 (pos)
-      (at end (not (Bb_not_secret)))  ; #82247: <==negation-removal== 14627 (pos)
+      (at end (Pb_secret))  ; #12310: <==closure== 67637 (pos)
+      (at end (Bb_secret))  ; #67637: origin
+      (at end (not (Bb_not_secret)))  ; #41597: <==negation-removal== 12310 (pos)
+      (at end (not (Pb_not_secret)))  ; #56360: <==negation-removal== 67637 (pos)
     )
   )
 
@@ -608,19 +614,19 @@
     :duration (= ?duration 1)
     :condition (and
       (over all (Ba_secret))
-      (over all (at_l2))
       (over all (Pa_secret))
+      (over all (at_l2))
     )
 
     :effect (and
-      (at end (Pb_secret))  ; #14627: <==closure== 50394 (pos)
-      (at end (Pc_secret))  ; #36903: <==closure== 91840 (pos)
-      (at end (Bb_secret))  ; #50394: origin
-      (at end (Bc_secret))  ; #91840: origin
-      (at end (not (Pc_not_secret)))  ; #38065: <==negation-removal== 91840 (pos)
-      (at end (not (Pb_not_secret)))  ; #43912: <==negation-removal== 50394 (pos)
-      (at end (not (Bc_not_secret)))  ; #70044: <==negation-removal== 36903 (pos)
-      (at end (not (Bb_not_secret)))  ; #82247: <==negation-removal== 14627 (pos)
+      (at end (Pb_secret))  ; #12310: <==closure== 67637 (pos)
+      (at end (Bc_secret))  ; #27689: origin
+      (at end (Bb_secret))  ; #67637: origin
+      (at end (Pc_secret))  ; #80404: <==closure== 27689 (pos)
+      (at end (not (Pc_not_secret)))  ; #17009: <==negation-removal== 27689 (pos)
+      (at end (not (Bb_not_secret)))  ; #41597: <==negation-removal== 12310 (pos)
+      (at end (not (Pb_not_secret)))  ; #56360: <==negation-removal== 67637 (pos)
+      (at end (not (Bc_not_secret)))  ; #83656: <==negation-removal== 80404 (pos)
     )
   )
 
@@ -634,14 +640,14 @@
     )
 
     :effect (and
-      (at end (Pb_secret))  ; #14627: <==closure== 50394 (pos)
-      (at end (Pc_secret))  ; #36903: <==closure== 91840 (pos)
-      (at end (Bb_secret))  ; #50394: origin
-      (at end (Bc_secret))  ; #91840: origin
-      (at end (not (Pc_not_secret)))  ; #38065: <==negation-removal== 91840 (pos)
-      (at end (not (Pb_not_secret)))  ; #43912: <==negation-removal== 50394 (pos)
-      (at end (not (Bc_not_secret)))  ; #70044: <==negation-removal== 36903 (pos)
-      (at end (not (Bb_not_secret)))  ; #82247: <==negation-removal== 14627 (pos)
+      (at end (Pb_secret))  ; #12310: <==closure== 67637 (pos)
+      (at end (Bc_secret))  ; #27689: origin
+      (at end (Bb_secret))  ; #67637: origin
+      (at end (Pc_secret))  ; #80404: <==closure== 27689 (pos)
+      (at end (not (Pc_not_secret)))  ; #17009: <==negation-removal== 27689 (pos)
+      (at end (not (Bb_not_secret)))  ; #41597: <==negation-removal== 12310 (pos)
+      (at end (not (Pb_not_secret)))  ; #56360: <==negation-removal== 67637 (pos)
+      (at end (not (Bc_not_secret)))  ; #83656: <==negation-removal== 80404 (pos)
     )
   )
 
@@ -649,16 +655,16 @@
     :parameters ()
     :duration (= ?duration 1)
     :condition (and
+      (over all (at_l4))
       (over all (Ba_secret))
       (over all (Pa_secret))
-      (over all (at_l4))
     )
 
     :effect (and
-      (at end (Pc_secret))  ; #36903: <==closure== 91840 (pos)
-      (at end (Bc_secret))  ; #91840: origin
-      (at end (not (Pc_not_secret)))  ; #38065: <==negation-removal== 91840 (pos)
-      (at end (not (Bc_not_secret)))  ; #70044: <==negation-removal== 36903 (pos)
+      (at end (Bc_secret))  ; #27689: origin
+      (at end (Pc_secret))  ; #80404: <==closure== 27689 (pos)
+      (at end (not (Pc_not_secret)))  ; #17009: <==negation-removal== 27689 (pos)
+      (at end (not (Bc_not_secret)))  ; #83656: <==negation-removal== 80404 (pos)
     )
   )
 

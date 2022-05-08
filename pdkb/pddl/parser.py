@@ -44,7 +44,7 @@ class Problem(object):
         export:  Save this problem into 2 PDDL files
     """
 
-    OBJECT = "default_objec"
+    OBJECT = "default_object"
 
     def __init__(self, domain_file, problem_file = None):
         """
@@ -278,13 +278,45 @@ class Problem(object):
                             "Error with time of predicate:\n"
                             f"{predicate.print_tree(print_=False)}"
                         )
+            dcond_idx = [n.name for n in child.children].index(":derive-condition")
+          #  print(child.children[dcond_idx+1].name)
+           # print('children at start: ', [n.name for n in child.children[dcond_idx+1].children])
             try:
                 dcond_idx = [n.name for n in child.children].index(":derive-condition")
-                if child.children[dcond_idx+1].name != "always":
-                    raise ParseError("Durative actions must have :derive-condition always.")
+                if child.children[dcond_idx+1].name == 'always':
+                     continue
+                elif child.children[dcond_idx+1].name == 'at':
+                    predicate = child.children[dcond_idx+1]
+                    time = predicate.children[0].name
+                    assert time in ("start", "end")
+                    assert not predicate.children[0].children
+                    predicate.children.pop(0)
+                    predicate.name = f"{predicate.name}-{time}"
+
+                elif child.children[dcond_idx+1].name == 'and':
+                    for predicate in child.children[dcond_idx+1].children:
+                        assert(predicate.name == "at", "Must include temporal descriptor of derive condition")
+                        time = predicate.children[0].name
+                        assert time in ("start", "end")
+                        assert not predicate.children[0].children
+                        predicate.children.pop(0)
+                        predicate.name = f"{predicate.name}-{time}"
+
+                else:
+                    raise ParseError("Durative action :derive-condition incorrectly defined.")
+
+              #  print('processed children:', [n.name for n in child.children[dcond_idx + 1].children])
+
+            #    dcond_idx = [n.name for n in child.children].index(":derive-condition")
+            #    if child.children[dcond_idx+1].name != "always":
+            #        raise ParseError("Durative actions must have :derive-condition always.")
+
             except ValueError:
+                print('child not named either')
                 child.children.insert(1, PDDL_Tree(":derive-condition"))
                 child.children.insert(2, PDDL_Tree("always"))
+
+
 
         assert "domain" in parse_tree, "Domain must have a name"
         self.domain_name = parse_tree ["domain"].named_children ()[0]
@@ -352,6 +384,7 @@ class Problem(object):
         }
 
         all_actions = list(parse_tree.find_all(":action")) + list(parse_tree.find_all(":durative-action"))
+       # print('Check of actions at 386: ', [n.name for n in a.children for a in all_actions])
         self.actions = [self.to_action(a) for a in all_actions]
 
 
@@ -484,6 +517,7 @@ class Problem(object):
         """
 
         name = node.children[0].name
+        print('The action is: ', name)
         parameter_map = {}
 
         if ":parameters" in node:
@@ -496,8 +530,20 @@ class Problem(object):
         assert ":derive-condition" in node, "Error: You must include the :derive-condition value for every action."
 
         dcond_ind = [n.name for n in node.children].index(':derive-condition')
+        #print(dcond_ind)
+        #might need to pass in own parameters here?
+      #  print('This is being passed into "to formula":', node.children[dcond_ind+1].name)
+        #g = [u.name for u in node.children[dcond_ind+1].children]
+        #print(g)
+        #if g:
+        #    print([b for b in g.children])
+        #if node.children[dcond_ind+1].children.children:
+        #    print([b for b in node.children[dcond_ind+1].children.children])
+      #  print(type(node.children[dcond_ind+1]))
         dcond = self.to_formula(node.children[dcond_ind+1], parameter_map)
-
+        #print('This is the formula created: ', dcond.name)
+       # print('This is the type of the formula created: ', type(dcond))
+        #print('This is the time of the formula: ', dcond.time)
 
         if ":precondition" in node:
             assert len(node[":precondition"].children) == 1,\
@@ -522,6 +568,9 @@ class Problem(object):
 
         if ":duration" in node:
             duration = Duration(node[":duration"])
+            #print('This is currently what is being passed into duration', dcond)
+            #print("other types: ", effect.name)
+            #print('Its type is', type(dcond))
             return DurativeAction(name, params, precond, observe, effect, dcond, duration)
         return Action(name, params, precond, observe, effect, dcond)
 
@@ -633,6 +682,9 @@ class Problem(object):
             pred.agent_list = "%s%s %s" % (modality, ag, pred.agent_list)
 
             return pred
+
+        #print("This node is being processed right now:", node.name)
+        #print("These are the args:", [a.name for a in args])
 
         for time in ("at-start", "at-end", "over-all"):
             if node.name == time:

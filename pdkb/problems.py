@@ -53,9 +53,15 @@ def convert_action(action, depth, agents, props, akprops):
     elif str(action.dcond) == '(never)':
         dcond = False
     elif action.dcond:
+        print(action.dcond)
+        print(action.dcond.time)
         dcond = parse_ma_cond(action.dcond)
+        t1,t2 = dcond
+        print(type(t1[0]))
     else:
         assert False, "Error for action %s. You need to specify the type of derived condition ('always', 'never', or 'custom')." % action.name
+
+
 
     if isinstance(action, DurativeOperator):
         action_start = deepcopy(action)
@@ -131,7 +137,7 @@ def _convert_action(act, action, depth, agents, props, akprops):
 def parse_problem(prob, domain):
 
     assert prob.task in list(PROBLEM_TYPES.keys()), "Error: Bad problem type: %s" % prob.task
-
+    print(prob.task)
     return PROBLEM_TYPES[prob.task](prob, domain)
 
 
@@ -230,11 +236,17 @@ def parse_pdkbddl(pdkbddl_file, input_is_file: bool=True):
     props = [parse_rml('_'.join(str(p)[1:-1].split())) for p in fluents]
     akprops = [parse_rml('_'.join(str(p)[1:-1].split())) for p in akfluents]
 
-
+    #print('operators before conversion: ', [a.name for a in prob.operators])
+    #print('operator attributes: ',  [a.dcond for a in prob.operators])
+    #z = list(prob.operators)
+    #print('Primitive attributes: ', [x.dcond.time for x in z])
     converted_actions = [act for a in prob.operators for act in convert_action(a, prob.depth, prob.agents, props, akprops)]
     domain = Domain(prob.agents, props, akprops,
                     converted_actions,
                     prob.depth, prob.types, prob.domain_name)
+
+    print('converted actions: ', [a.name for a in converted_actions])
+    print('action dconds: ', [v.derived_cond for v in converted_actions])
 
     return parse_problem(prob, domain)
 

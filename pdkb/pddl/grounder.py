@@ -59,6 +59,7 @@ class GroundProblem(Problem):
 
             # create operators by changing all the formulas
             self.operators = set([])
+            print('testing what is here at grounder: ', [a.name for a in self.actions])
             for a in self.actions:
                 # parameters stay the same
                 param = a.parameters
@@ -357,8 +358,10 @@ class GroundProblem(Problem):
         self.operators = set([])
 
         for a in self.actions:
-
+            #print('action name:', a.name)
             var_names, val_generator = self._create_valuations(a.parameters, a)
+            #print('var names:', var_names)
+            #print('Val generator:', val_generator)
 
             for valuation in val_generator:
                 assignment = {var_name: val for var_name, val in zip(var_names, valuation)}
