@@ -62,9 +62,9 @@ def convert_action(action, depth, agents, props, akprops):
         action_start = deepcopy(action)
         action_overall = deepcopy(action)
         action_end = deepcopy(action)
-        action_start.precondition.args = [p for p in action.precondition.args if p.time in ("at-start", "over-all")]
+        action_start.precondition.args = [p for p in action.precondition.args if p.time == "at-start"]
         action_overall.precondition.args = [p for p in action.precondition.args if p.time == "over-all"]
-        action_end.precondition.args = [p for p in action.precondition.args if p.time in ("at-end", "over-all")]
+        action_end.precondition.args = [p for p in action.precondition.args if p.time == "at-end"]
         action_start.effect.args = [e for e in action.effect.args if e.time == "at-start"]
         assert not [e for e in action.effect.args if e.time == "over-all"]
         action_overall.effect.args = []
