@@ -1,4 +1,5 @@
 import os, time
+from pathlib import Path
 import re
 from copy import deepcopy
 from typing import List, Sequence, Union
@@ -137,6 +138,7 @@ def parse_problem(prob, domain):
 
 def read_pdkbddl_file(fname: str, input_is_file: bool=True):
     lines = read_file(fname) if input_is_file else [l.strip() for l in fname.split("\n")]
+    base_dir = Path(fname).resolve().parent
 
     found = True
     count = 0
@@ -146,21 +148,19 @@ def read_pdkbddl_file(fname: str, input_is_file: bool=True):
             assert False, "Error: Already attempted at least 100 imports. Did you recursively import something?"
 
         found = False
-        include_indices = []
 
-        for i in range(len(lines)):
-            if lines[i].find('{include') == 0:
-                include_indices.append(i)
+        # iterate bottom-to-top so that adding the imports doesn't change the line
+        # numbers for subsequent imports
+        for i in range(len(lines) - 1, -1, -1):
+            line = lines[i]
+            if line.startswith("{include:"):
                 found = True
-
-        for index in reversed(include_indices):
-            new_file = os.path.join(os.path.split(fname)[0], lines[index].split(':')[1][:-1])
-            lines = lines[:index] + read_pdkbddl_file(new_file) + lines[index+1:]
+                imp_fname = line.replace("{include:", "").replace("}", "").strip()
+                imp_path = str(base_dir / imp_fname)
+                lines = lines[:i] + read_pdkbddl_file(imp_path) + lines[i+1:]
 
     # Strip out the comments and empty lines
-    lines = [x for x in lines if x != '']
-    lines = [x for x in lines if x[0] != ';']
-    lines = [x.split(';')[0] for x in lines]
+    lines = [x.split(';')[0] for x in lines if x != '' and x[0] != ';']
 
     # Convert the [] and <> notation to nested B's
     def replace_modal(left, right, sym, line):
@@ -192,11 +192,11 @@ def read_pdkbddl_file(fname: str, input_is_file: bool=True):
         return new_line
 
     def replace_belief(line):
-        if not re.search(r"\[\s*?[A-Za-z][A-Za-z0-9_\-]*?\s*?\]", line):
+        if not re.search(r"\[\s*?[A-Za-z?][A-Za-z0-9_\-]*?\s*?\]", line):
             return line
         return replace_modal('[', ']', 'B', line)
     def replace_possible(line):
-        if not re.search(r"\<\s*?[A-Za-z][A-Za-z0-9_\-]*?\s*?\>", line):
+        if not re.search(r"\<\s*?[A-Za-z?][A-Za-z0-9_\-]*?\s*?\>", line):
             return line
         return replace_modal('<', '>', 'P', line)
     def replace_alwaysknow(line):
