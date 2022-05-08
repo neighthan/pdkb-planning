@@ -181,6 +181,8 @@ def _check_times_present(*formulas: Optional[Formula]):
     for formula in formulas:
         if formula is None: continue
         if isinstance(formula, And):
-            assert formula.time == None
-            for arg in formula.args:
-                assert arg.time in times
+            if formula.time not in times:
+                for arg in formula.args:
+                    assert arg.time in times
+        else:
+            assert formula.time in times

@@ -193,6 +193,15 @@ class DurativeAction(Action):
         self.duration = duration
 
 
+def _rml_to_pddl(rml, time: str, negate: bool):
+    if isinstance(rml, (Literal, Belief, Possible)):
+        if negate:
+            return f"({time} (not ({rml.pddl()})))"
+        else:
+            return f"({time} ({rml.pddl()}))"
+    assert False
+
+
 class CombinedDurativeAction:
     """Only used for outputting PDDL; not an Action subclass."""
     def __init__(self, actions: Sequence[DurativeAction]):
@@ -209,12 +218,12 @@ class CombinedDurativeAction:
             "    :parameters ()",
             f"    :duration {self.duration}",
             "    :condition (and",
-            *[f"      (at start ({rml.pddl()}))" for rml in self.start_act.pre],
-            *[f"      (at start (not ({rml.pddl()})))" for rml in self.start_act.npre],
-            *[f"      (over all ({rml.pddl()}))" for rml in self.overall_act.pre],
-            *[f"      (over all (not ({rml.pddl()})))" for rml in self.overall_act.npre],
-            *[f"      (at end ({rml.pddl()}))" for rml in self.end_act.pre],
-            *[f"      (at end (not ({rml.pddl()})))" for rml in self.end_act.npre],
+            *[f"      {_rml_to_pddl(rml, 'at start', False)}" for rml in self.start_act.pre],
+            *[f"      {_rml_to_pddl(rml, 'at start', True)}" for rml in self.start_act.npre],
+            *[f"      {_rml_to_pddl(rml, 'over all', False)}" for rml in self.overall_act.pre],
+            *[f"      {_rml_to_pddl(rml, 'over all', True)}" for rml in self.overall_act.npre],
+            *[f"      {_rml_to_pddl(rml, 'at end', False)}" for rml in self.end_act.pre],
+            *[f"      {_rml_to_pddl(rml, 'at end', True)}" for rml in self.end_act.npre],
             "    )",
         ]
 
@@ -230,11 +239,10 @@ class CombinedDurativeAction:
             neg_end_effects = sorted(self.end_act.effs[0][1], key=lambda e: e.id())
             start_effects = [(e, False) for e in pos_start_effects] + [(e, True) for e in neg_start_effects]
             end_effects = [(e, False) for e in pos_end_effects] + [(e, True) for e in neg_end_effects]
-            # the right parens are missing here on purpose! those are added in effect.pddl
             lines.extend([
                 "\n    :effect (and",
-                *[f"      (at start {effect.pddl(negate=negate, close_extra_parens=1)}" for effect, negate in start_effects],
-                *[f"      (at end {effect.pddl(negate=negate, close_extra_parens=1)}" for effect, negate in end_effects],
+                *[f"      {effect.pddl(negate=negate, time='at start')}" for effect, negate in start_effects],
+                *[f"      {effect.pddl(negate=negate, time='at end')}" for effect, negate in end_effects],
                 "    )",
             ])
         lines.append("  )")
@@ -336,7 +344,7 @@ class CondEff(object):
     def depth(self):
         return max([rml.get_depth() for rml in self.condp.rmls | self.condn.rmls | set([self.eff])])
 
-    def pddl(self, spacing = '', negate = False, close_extra_parens: int=0):
+    def pddl(self, spacing = '', negate = False, time: str=""):
 
         # Set to true if you want to export effects in the style of epddl
         #  Note that this will not be compatible with classical planners
@@ -348,23 +356,32 @@ class CondEff(object):
             reason = "  ; #%s: <==%s== %s (%s)" % (self.id(), self.reason[0], self.reason[2].id(), self.reason[1])
         else:
             reason = "  ; #%s: origin" % self.id()
-        reason = ")" * close_extra_parens + reason
+
+        def rml_to_pddl(rml, negate: bool):
+            assert isinstance(rml, (Literal, Belief, Possible))
+            if time:
+                if negate:
+                    return f"({time} (not ({rml.pddl()})))"
+                return f"({time} ({rml.pddl()}))"
+            if negate:
+                return f"(not ({rml.pddl()}))"
+            return f"({rml.pddl()})"
 
         if (not self.condp.rmls) and (not self.condn.rmls):
             if negate:
                 if EPDDL:
                     return spacing + "<{(True)} {(not (%s))}>" % self.eff.pddl() + reason
                 else:
-                    return spacing + "(not (%s))" % self.eff.pddl() + reason
+                    return spacing + rml_to_pddl(self.eff, negate) + reason
             else:
                 if EPDDL:
                     return spacing + "<{(True)} {(%s)}>" % self.eff.pddl() + reason
                 else:
-                    return spacing + "(%s)" % self.eff.pddl() + reason
+                    return spacing + rml_to_pddl(self.eff, negate) + reason
 
         cond_size = len(self.condp) + len(self.condn)
-        condition = delim.join(["(%s)" % rml.pddl() for rml in self.condp] + \
-                               ["(not (%s))" % rml.pddl() for rml in self.condn])
+        condition = delim.join([rml_to_pddl(rml, False) for rml in self.condp] + \
+                               [rml_to_pddl(rml, True) for rml in self.condn])
         if cond_size > 1:
             condition = "(and %s)" % condition
 
@@ -372,12 +389,12 @@ class CondEff(object):
             if EPDDL:
                 return spacing + "<{%s}\n%s      {(not (%s))}>" % (condition, spacing, self.eff.pddl()) + reason
             else:
-                return spacing + "(when (and %s)\n%s      (not (%s)))" % (condition, spacing, self.eff.pddl()) + reason
+                return spacing + "(when (and %s)\n%s      %s)" % (condition, spacing, rml_to_pddl(self.eff, negate)) + reason
         else:
             if EPDDL:
                 return spacing + "<{%s}\n%s      {(%s)}>" % (condition, spacing, self.eff.pddl()) + reason
             else:
-                return spacing + "(when (and %s)\n%s      (%s))" % (condition, spacing, self.eff.pddl()) + reason
+                return spacing + "(when (and %s)\n%s      %s)" % (condition, spacing, rml_to_pddl(self.eff, negate)) + reason
 
 
 

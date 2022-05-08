@@ -46,7 +46,7 @@ class GroundProblem(Problem):
         """
 
 
-        super(GroundProblem, self).__init__(domain_file, problem_file)
+        super().__init__(domain_file, problem_file)
 
         if no_ground:
             # create fluents

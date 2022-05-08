@@ -228,6 +228,16 @@ class Or (Formula):
         return str(self)
 
 
+def flatten_and(args_list, formula: Formula):
+    if isinstance(formula, And):
+        for arg in formula.args:
+            if formula.time:
+                arg.time = formula.time
+            flatten_and(args_list, arg)
+    else:
+        args_list.append(formula)
+
+
 class And(Formula):
 
     def __init__(self, args):
@@ -235,10 +245,10 @@ class And(Formula):
             Inputs:
                 args:    list of formula objects
         """
-        args = [x for x in args if not isinstance(x, And)] + \
-               [item for andarg in [x for x in args if isinstance(x, And)] for item in andarg.args]
-
-        super(And, self).__init__("and", args)
+        and_args = []
+        for arg in args:
+            flatten_and(and_args, arg)
+        super(And, self).__init__("and", and_args)
 
     def __str__(self):
         """
