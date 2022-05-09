@@ -374,14 +374,32 @@ class GroundProblem(Problem):
                 self.fluents.add(self._predicate_to_fluent(p, assignment))
 
     def _create_numeric_fluents(self):
-        """Create the set of numeric fluents by grounding the functions."""
+        """
+        Create the set of numeric fluents by grounding the functions.
+
+        Function syntax is like
+          (travel-time ?l1 ?l2 - loc)
+        or
+          (func-name ?x - type1 ?y - type2)
+        A numeric fluent will be created for each possible combination of the arguments.
+        """
         PASS_THROUGH.numeric_fluents = set()
         for func in self.functions:
-            # like ['?l1', '-', 'location', '?l2', '-', 'location']
-            names = [c.name for c in func.children]
-            assert set(names[1::3]) == {"-"}
-            assert len(names) % 3 == 0
-            args = list(zip(names[::3], names[2::3]))
+            args = []
+            current_args = []
+            i = 0
+            while i < len(func.children):
+                if func.children[i].name == "-":
+                    arg_type = func.children[i + 1].name
+                    args.extend(zip(current_args, [arg_type] * len(current_args)))
+                    current_args = []
+                    i += 1
+                else:
+                    arg = func.children[i].name
+                    assert arg.startswith("?")
+                    current_args.append(arg)
+                i += 1
+            assert not current_args
             _, val_generator = self._create_valuations(args)
             for valuation in val_generator:
                 PASS_THROUGH.numeric_fluents.add(f"{func.name}_{'_'.join(valuation)}")
